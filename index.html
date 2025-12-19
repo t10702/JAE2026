@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 JAE | Level Progression System</title>
+    <title>2026 JAE | Battle Intelligence</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -12,34 +12,41 @@
             --gold: #f59e0b;
             --glass: rgba(15, 23, 42, 0.9);
             --border: rgba(34, 211, 238, 0.2);
-            --xp-bg: #1e293b;
         }
 
         body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: var(--bg); color: #fff; }
 
-        /* --- 登入介面 --- */
+        /* --- 封面介面 --- */
         #loginWrapper {
             height: 100vh; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%);
+            background: 
+                linear-gradient(rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.8)),
+                repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(34, 211, 238, 0.05) 1px, rgba(34, 211, 238, 0.05) 2px),
+                radial-gradient(circle at center, #1e293b 0%, #020617 100%);
             position: fixed; z-index: 1000; transition: 0.8s ease;
         }
-        .game-title { font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; letter-spacing: 5px; background: linear-gradient(to bottom, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+
+        .game-title { 
+            font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; letter-spacing: 5px; 
+            background: linear-gradient(to bottom, #fff, var(--accent)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; 
+        }
 
         .login-card { width: 85%; max-width: 400px; background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--border); backdrop-filter: blur(15px); margin-top: 30px; }
+        
         select, input { width: 100%; padding: 18px; margin: 10px 0; background: rgba(0,0,0,0.5); border: 1px solid #334155; border-radius: 12px; color: #fff; font-size: 1.1rem; box-sizing: border-box; }
+        
         .btn-action { width: 100%; padding: 20px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 800; cursor: pointer; transition: 0.3s; background: var(--accent); color: #020617; margin-top: 20px; }
 
-        /* --- 報表內容 --- */
+        /* --- 內部報表 --- */
         #reportSection { display: none; max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        
         .header-box { background: var(--glass); border-radius: 30px; padding: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); margin-bottom: 25px; }
 
-        /* --- XP 進度條樣式 --- */
-        .xp-section { margin-top: 15px; }
+        /* XP 長條圖 */
         .xp-header { display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; font-weight: bold; }
-        .xp-bar-container { width: 300px; height: 14px; background: var(--xp-bg); border-radius: 7px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, #06b6d4, #22d3ee); width: 0%; transition: 2.5s cubic-bezier(0.1, 1, 0.1, 1); position: relative; }
-        .xp-bar-fill::after { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shine 2s infinite; }
-        @keyframes shine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .xp-bar-container { width: 300px; height: 12px; background: #1e293b; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, #06b6d4, #22d3ee); width: 0%; transition: 2.5s cubic-bezier(0.1, 1, 0.1, 1); }
 
         .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: var(--glass); padding: 20px; border-radius: 20px; text-align: center; border: 1px solid var(--border); }
@@ -48,7 +55,6 @@
         .main-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; }
         .card { background: var(--glass); border-radius: 25px; padding: 25px; border: 1px solid var(--border); }
         
-        /* 修改密碼彈窗 */
         #pwdModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #0f172a; border: 2px solid var(--accent); padding: 30px; border-radius: 25px; z-index: 2000; }
         .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1500; }
     </style>
@@ -57,7 +63,7 @@
 
     <div id="loginWrapper">
         <h1 class="game-title">2026 JAE</h1>
-        <div style="letter-spacing: 10px; color: #64748b; font-size: 0.8rem; margin-bottom: 30px;">SECURE ACCESS ONLY</div>
+        <div style="letter-spacing: 10px; color: #64748b; font-size: 0.8rem; margin-bottom: 30px;">BATTLE REPORT SYSTEM</div>
         <div class="login-card">
             <select id="userSelect"><option value="">-- SELECT HERO --</option></select>
             <input type="password" id="userPass" placeholder="PASSCODE (308XX)">
@@ -71,16 +77,14 @@
                 <div id="rankOrb" style="width:90px; height:90px; border: 6px solid; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:3rem; font-weight:900; margin-right:25px;">?</div>
                 <div>
                     <h2 id="displayName" style="margin:0; font-size: 2.5rem;">NAME</h2>
-                    <div id="displayRank" style="color: var(--gold); font-weight: 800; font-size: 1.2rem;">RANK</div>
+                    <div id="displayRank" style="color: var(--gold); font-weight: 800; font-size: 1.5rem;">RANK</div>
                     
-                    <div class="xp-section">
+                    <div style="margin-top: 15px;">
                         <div class="xp-header">
                             <span id="nextLevelName">NEXT GOAL: ---</span>
                             <span id="xpRemaining">REMAINING: 0 XP</span>
                         </div>
-                        <div class="xp-bar-container">
-                            <div id="xpFill" class="xp-bar-fill"></div>
-                        </div>
+                        <div class="xp-bar-container"><div id="xpFill" class="xp-bar-fill"></div></div>
                     </div>
                 </div>
             </div>
@@ -95,16 +99,16 @@
             <div class="stat-card">班級排名<span id="cRank" class="stat-val">-</span></div>
             <div class="stat-card">校內排名<span id="sRank" class="stat-val">-</span></div>
             <div class="stat-card">考區排名<span id="dRank" class="stat-val">-</span></div>
-            <div class="stat-card" style="border: 2px solid #f87171;">預估落點<span id="predictSchool" class="stat-val" style="font-size: 1.2rem; color:#fff;">-</span></div>
+            <div class="stat-card" style="border: 2px solid #f87171;">預估落點<span id="predictSchool" class="stat-val" style="font-size: 1.15rem; color:#fff;">-</span></div>
         </div>
 
         <div class="main-layout">
             <div class="card">
-                <h3 style="margin-top:0; color:var(--accent);">🎯 S4 賽季突破指南</h3>
+                <h3 style="margin-top:0; color:var(--accent);">🎯 S4 賽季攻略戰術</h3>
                 <div id="strategyList"></div>
             </div>
             <div class="card">
-                <h3 style="margin-top:0; color:var(--accent);">🛡️ 戰力分布</h3>
+                <h3 style="margin-top:0; color:var(--accent);">🛡️ 戰力分布圖</h3>
                 <div style="height: 300px;"><canvas id="radarChart"></canvas></div>
             </div>
         </div>
@@ -114,15 +118,15 @@
 
     <div id="overlay" class="overlay"></div>
     <div id="pwdModal">
-        <h3 style="margin-top:0; color:var(--accent);">變更安全認證碼</h3>
+        <h3 style="margin-top:0; color:var(--accent);">安全認證變更</h3>
         <input type="password" id="oldPwd" placeholder="目前密碼">
-        <input type="password" id="newPwd" placeholder="新密碼">
-        <input type="password" id="confirmPwd" placeholder="確認新密碼">
+        <input type="password" id="newPwd" placeholder="新密碼 (至少4碼)">
         <button class="btn-action" onclick="submitNewPwd()">儲存變更</button>
         <button onclick="closePwdModal()" style="width:100%; background:none; border:none; color:#64748b; margin-top:15px; cursor:pointer;">取消</button>
     </div>
 
 <script>
+    // 學生數據：包含等級中文名稱與 5C 修正
     const studentDB = [
         { id: 1, name: "王昱叡", rank: "守護白金 I", score: 28, cRank: 12, sRank: 227, dRank: 2065, grades: {ch:"B+", en:"B", ma:"B++", sc:"B++", so:"A"}, s: ["鞏固社會科 A 級優勢，確保基礎題不失分","數自兩科已達 B++，針對弱點題型衝刺 A 級","英文 B 級為最大缺口，需每日加強基礎單字量","國文需增加課外白話文閱讀量，提升語感","寫作練習增加敘事細節，目標穩定 4 級分以上"] },
         { id: 2, name: "吳彥勳", rank: "勇者黃金 I", score: 25, cRank: 15, sRank: 299, dRank: 3006, grades: {ch:"B+", en:"B", ma:"A+", sc:"B+", so:"B"}, s: ["發揮數學 A+ 優勢，挑戰 A++ 滿分點數","英文 B 級需突破，建議從歷屆考題基礎句型練習","社會科回歸課本圖表，釐清史地整合概念","國文加強文言文翻譯能力，爭取 B++ 門檻","模擬考後確實訂正錯題，建立專屬錯題本"] },
@@ -157,10 +161,10 @@
     ];
 
     const thresholds = [
-        { score: 105, name: "優質職校門檻" },
-        { score: 110, name: "溪湖高中門檻" },
-        { score: 118, name: "精誠/員中門檻" },
-        { score: 121, name: "彰中/彰女門檻" },
+        { score: 105, name: "優質技術型高中" },
+        { score: 112, name: "溪湖高中" },
+        { score: 118, name: "員林高中" },
+        { score: 121, name: "彰中 / 彰女" },
         { score: 135, name: "全區巔峰王者" }
     ];
 
@@ -178,7 +182,7 @@
         if(sid && inputPass === savedPass) {
             document.getElementById('loginWrapper').style.opacity = "0";
             setTimeout(() => { document.getElementById('loginWrapper').style.display = "none"; showReport(sid); }, 600);
-        } else alert("ACCESS DENIED");
+        } else alert("認證錯誤，請重新輸入");
     }
 
     function showReport(id) {
@@ -187,25 +191,24 @@
         document.getElementById('reportSection').style.display = "block";
         document.getElementById('displayName').innerText = s.name;
         document.getElementById('displayScore').innerText = total;
+        document.getElementById('displayRank').innerText = s.rank;
         document.getElementById('cRank').innerText = s.cRank;
         document.getElementById('sRank').innerText = s.sRank;
         document.getElementById('dRank').innerText = s.dRank;
 
-        // 計算下一級距離
+        // 更新 XP 長條圖邏輯
         const nextGoal = thresholds.find(t => t.score > total) || thresholds[thresholds.length-1];
-        const prevGoalScore = total < 105 ? 90 : (thresholds.slice().reverse().find(t => t.score <= total)?.score || 90);
-        
-        const remaining = nextGoal.score - total;
+        const prevGoalScore = (thresholds.slice().reverse().find(t => t.score <= total)?.score || 90);
         const progress = ((total - prevGoalScore) / (nextGoal.score - prevGoalScore)) * 100;
 
         document.getElementById('nextLevelName').innerText = `NEXT GOAL: ${nextGoal.name}`;
-        document.getElementById('xpRemaining').innerText = remaining > 0 ? `REMAINING: ${remaining} XP` : "MAX LEVEL REACHED";
+        document.getElementById('xpRemaining').innerText = nextGoal.score > total ? `REMAINING: ${nextGoal.score - total} XP` : "MAX LEVEL";
         document.getElementById('xpFill').style.width = Math.max(10, progress) + "%";
 
         const orb = document.getElementById('rankOrb');
         orb.innerText = s.score > 35 ? "L" : s.score > 25 ? "G" : "B";
-        orb.style.borderColor = s.score > 35 ? "var(--gold)" : "var(--accent)";
-        orb.style.color = s.score > 35 ? "var(--gold)" : "var(--accent)";
+        orb.style.color = s.score > 35 ? "var(--gold)" : s.score > 25 ? "var(--accent)" : "#94a3b8";
+        orb.style.borderColor = orb.style.color;
 
         const list = document.getElementById('strategyList');
         list.innerHTML = "";
@@ -217,19 +220,29 @@
         });
 
         renderChart(s.grades);
-        document.getElementById('predictSchool').innerText = total >= 121 ? "彰中/彰女" : total >= 110 ? "溪湖高中" : "員家/北家";
+        document.getElementById('predictSchool').innerText = total >= 121 ? "彰中 / 彰女" : total >= 112 ? "溪湖高中" : "員家 / 北家";
     }
 
     function renderChart(g) {
+        // 5C 權重修正：C=20，讓 5C 學生的雷達圖變得很小，符合「待加強」的視覺邏輯
         const map = { "A++": 100, "A+": 92, "A": 85, "B++": 72, "B+": 62, "B": 50, "C": 20 };
         const ctx = document.getElementById('radarChart').getContext('2d');
         new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: ['國文', '英文', '數學', '自然', '社會'],
-                datasets: [{ data: [map[g.ch], map[g.en], map[g.ma], map[g.sc], map[g.so]], backgroundColor: 'rgba(34, 211, 238, 0.2)', borderColor: '#22d3ee', borderWidth: 3 }]
+                datasets: [{ 
+                    data: [map[g.ch], map[g.en], map[g.ma], map[g.sc], map[g.so]], 
+                    backgroundColor: 'rgba(34, 211, 238, 0.2)', 
+                    borderColor: '#22d3ee', 
+                    borderWidth: 3 
+                }]
             },
-            options: { maintainAspectRatio: false, scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.1)' } } }, plugins: { legend: { display: false } } }
+            options: { 
+                maintainAspectRatio: false, 
+                scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.1)' } } },
+                plugins: { legend: { display: false } }
+            }
         });
     }
 
@@ -240,8 +253,13 @@
         const oldP = document.getElementById('oldPwd').value;
         const newP = document.getElementById('newPwd').value;
         const savedPass = localStorage.getItem('pwd_' + sid) || "308" + (sid < 10 ? '0'+sid : sid);
-        if (oldP === savedPass && newP.length >= 4) { localStorage.setItem('pwd_' + sid, newP); alert("密碼修改成功！"); closePwdModal(); }
-        else { alert("舊密碼錯誤或新密碼太短！"); }
+        if (oldP === savedPass && newP.length >= 4) { 
+            localStorage.setItem('pwd_' + sid, newP); 
+            alert("密碼修改成功！"); 
+            closePwdModal(); 
+        } else { 
+            alert("舊密碼錯誤或新密碼太短（需4碼以上）"); 
+        }
     }
 </script>
 </body>
