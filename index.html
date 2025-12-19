@@ -3,47 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 JAE | Battle Intelligence</title>
+    <title>2026 JAE | Growth Evolution</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #020617;
             --accent: #22d3ee;
             --gold: #f59e0b;
+            --up: #4ade80;   /* 進步色 */
+            --down: #f87171; /* 退步色 */
             --glass: rgba(15, 23, 42, 0.9);
             --border: rgba(34, 211, 238, 0.2);
         }
 
         body, html { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: var(--bg); color: #fff; }
 
-        /* --- 封面介面 --- */
+        /* --- 登入畫面 --- */
         #loginWrapper {
             height: 100vh; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: 
-                linear-gradient(rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.8)),
-                repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(34, 211, 238, 0.05) 1px, rgba(34, 211, 238, 0.05) 2px),
-                radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
             position: fixed; z-index: 1000; transition: 0.8s ease;
         }
-
-        .game-title { 
-            font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; letter-spacing: 5px; 
-            background: linear-gradient(to bottom, #fff, var(--accent)); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; 
-        }
-
+        .game-title { font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; letter-spacing: 5px; background: linear-gradient(to bottom, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
         .login-card { width: 85%; max-width: 400px; background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--border); backdrop-filter: blur(15px); margin-top: 30px; }
-        
         select, input { width: 100%; padding: 18px; margin: 10px 0; background: rgba(0,0,0,0.5); border: 1px solid #334155; border-radius: 12px; color: #fff; font-size: 1.1rem; box-sizing: border-box; }
-        
         .btn-action { width: 100%; padding: 20px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 800; cursor: pointer; transition: 0.3s; background: var(--accent); color: #020617; margin-top: 20px; }
 
-        /* --- 內部報表 --- */
+        /* --- 報表內容 --- */
         #reportSection { display: none; max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .header-box { background: var(--glass); border-radius: 30px; padding: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); margin-bottom: 25px; position: relative; }
         
-        .header-box { background: var(--glass); border-radius: 30px; padding: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); margin-bottom: 25px; }
+        /* 成長標籤 */
+        .growth-tag { position: absolute; top: -10px; right: 30px; padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; }
+        .growth-up { background: var(--up); color: #064e3b; }
+        .growth-down { background: var(--down); color: #450a0a; }
 
-        /* XP 長條圖 */
+        /* XP 進度條 */
         .xp-header { display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; font-weight: bold; }
         .xp-bar-container { width: 300px; height: 12px; background: #1e293b; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
         .xp-bar-fill { height: 100%; background: linear-gradient(90deg, #06b6d4, #22d3ee); width: 0%; transition: 2.5s cubic-bezier(0.1, 1, 0.1, 1); }
@@ -54,7 +49,8 @@
 
         .main-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; }
         .card { background: var(--glass); border-radius: 25px; padding: 25px; border: 1px solid var(--border); }
-        
+
+        /* 修改密碼彈窗 */
         #pwdModal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 350px; background: #0f172a; border: 2px solid var(--accent); padding: 30px; border-radius: 25px; z-index: 2000; }
         .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 1500; }
     </style>
@@ -63,7 +59,7 @@
 
     <div id="loginWrapper">
         <h1 class="game-title">2026 JAE</h1>
-        <div style="letter-spacing: 10px; color: #64748b; font-size: 0.8rem; margin-bottom: 30px;">BATTLE REPORT SYSTEM</div>
+        <div style="letter-spacing: 10px; color: #64748b; font-size: 0.8rem; margin-bottom: 30px;">9TH GRADE BATTLE REPORT</div>
         <div class="login-card">
             <select id="userSelect"><option value="">-- SELECT HERO --</option></select>
             <input type="password" id="userPass" placeholder="PASSCODE (308XX)">
@@ -73,12 +69,12 @@
 
     <div id="reportSection">
         <div class="header-box">
+            <div id="growthTag" class="growth-tag"></div>
             <div style="display: flex; align-items: center;">
                 <div id="rankOrb" style="width:90px; height:90px; border: 6px solid; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:3rem; font-weight:900; margin-right:25px;">?</div>
                 <div>
                     <h2 id="displayName" style="margin:0; font-size: 2.5rem;">NAME</h2>
                     <div id="displayRank" style="color: var(--gold); font-weight: 800; font-size: 1.5rem;">RANK</div>
-                    
                     <div style="margin-top: 15px;">
                         <div class="xp-header">
                             <span id="nextLevelName">NEXT GOAL: ---</span>
@@ -89,7 +85,7 @@
                 </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 0.9rem; color: var(--accent); font-weight: bold;">TOTAL POWER (135)</div>
+                <div style="font-size: 0.9rem; color: var(--accent); font-weight: bold;">TOTAL POWER (90+XP)</div>
                 <div id="displayScore" style="font-size: 5.5rem; font-weight: 900; line-height:1;">0</div>
                 <button onclick="openPwdModal()" style="background:none; border: 1px solid #475569; color:#475569; border-radius:5px; cursor:pointer; font-size:0.7rem; margin-top:10px;">修改密碼</button>
             </div>
@@ -99,16 +95,16 @@
             <div class="stat-card">班級排名<span id="cRank" class="stat-val">-</span></div>
             <div class="stat-card">校內排名<span id="sRank" class="stat-val">-</span></div>
             <div class="stat-card">考區排名<span id="dRank" class="stat-val">-</span></div>
-            <div class="stat-card" style="border: 2px solid #f87171;">預估落點<span id="predictSchool" class="stat-val" style="font-size: 1.15rem; color:#fff;">-</span></div>
+            <div class="stat-card" style="border: 2px solid #f87171;">預估落點<span id="predictSchool" class="stat-val" style="font-size: 1.1rem; color:#fff;">-</span></div>
         </div>
 
         <div class="main-layout">
             <div class="card">
-                <h3 style="margin-top:0; color:var(--accent);">🎯 S4 賽季攻略戰術</h3>
+                <h3 style="margin-top:0; color:var(--accent);">🎯 本次戰役攻略</h3>
                 <div id="strategyList"></div>
             </div>
             <div class="card">
-                <h3 style="margin-top:0; color:var(--accent);">🛡️ 戰力分布圖</h3>
+                <h3 style="margin-top:0; color:var(--accent);">🛡️ 戰力分布</h3>
                 <div style="height: 300px;"><canvas id="radarChart"></canvas></div>
             </div>
         </div>
@@ -118,73 +114,90 @@
 
     <div id="overlay" class="overlay"></div>
     <div id="pwdModal">
-        <h3 style="margin-top:0; color:var(--accent);">安全認證變更</h3>
+        <h3 style="margin-top:0; color:var(--accent);">變更安全認證碼</h3>
         <input type="password" id="oldPwd" placeholder="目前密碼">
-        <input type="password" id="newPwd" placeholder="新密碼 (至少4碼)">
+        <input type="password" id="newPwd" placeholder="新密碼">
         <button class="btn-action" onclick="submitNewPwd()">儲存變更</button>
         <button onclick="closePwdModal()" style="width:100%; background:none; border:none; color:#64748b; margin-top:15px; cursor:pointer;">取消</button>
     </div>
 
 <script>
-    // 學生數據：包含等級中文名稱與 5C 修正
+    // --- 1. 全班完整數據 (姓名已還原) ---
     const studentDB = [
-        { id: 1, name: "王昱叡", rank: "守護白金 I", score: 28, cRank: 12, sRank: 227, dRank: 2065, grades: {ch:"B+", en:"B", ma:"B++", sc:"B++", so:"A"}, s: ["鞏固社會科 A 級優勢，確保基礎題不失分","數自兩科已達 B++，針對弱點題型衝刺 A 級","英文 B 級為最大缺口，需每日加強基礎單字量","國文需增加課外白話文閱讀量，提升語感","寫作練習增加敘事細節，目標穩定 4 級分以上"] },
-        { id: 2, name: "吳彥勳", rank: "勇者黃金 I", score: 25, cRank: 15, sRank: 299, dRank: 3006, grades: {ch:"B+", en:"B", ma:"A+", sc:"B+", so:"B"}, s: ["發揮數學 A+ 優勢，挑戰 A++ 滿分點數","英文 B 級需突破，建議從歷屆考題基礎句型練習","社會科回歸課本圖表，釐清史地整合概念","國文加強文言文翻譯能力，爭取 B++ 門檻","模擬考後確實訂正錯題，建立專屬錯題本"] },
-        { id: 3, name: "李致諭", rank: "勇者黃金 II", score: 23, cRank: 20, sRank: 351, dRank: 3751, grades: {ch:"B", en:"C", ma:"A", sc:"B", so:"B+"}, s: ["守住數學 A 級優勢，它是你上分的強力支柱","英文 C 級是致命傷，先求背熟基本 1200 單字脫 C","社會科衝刺 B++ 目標 A，補強公民法律篇章","自然科釐清物理化學公式，減少基礎計算錯誤","寫作練習文章起承轉合，避免篇幅過短"] },
-        { id: 4, name: "李晉安", rank: "勇者黃金 III", score: 20, cRank: 25, sRank: 419, dRank: 5065, grades: {ch:"B", en:"C", ma:"B+", sc:"B", so:"B"}, s: ["英文優先處理基礎發音與字彙，脫離 C 級雷區","數學 B+ 具備衝刺 B++ 潛力，多練幾何題型","國文提升閱讀理解速度，避免考試時間不足","社會科嘗試圖表筆記整理法，強化記憶點","設定每週進步小目標，先從弱科進步一階開始"] },
-        { id: 5, name: "沈宏彥", rank: "永恆鑽石 I", score: 31, cRank: 10, sRank: 142, dRank: 1250, grades: {ch:"A+", en:"B", ma:"A+", sc:"B+", so:"A"}, s: ["國數兩科具備 A+ 實力，針對難題進行破題練習","英文 B 級拖累總分，需補強基礎文法與聽力","自然科加強實驗題與圖表分析，目標衝向 A","社會科穩定發揮 A 級表現，維持讀書手感","寫作目標 5 級分，多臨摹範文的佳句修辭"] },
-        { id: 6, name: "張于宗", rank: "勇者黃金 III", score: 20, cRank: 26, sRank: 427, dRank: 5326, grades: {ch:"C", en:"B", ma:"B+", sc:"B", so:"B"}, s: ["國文 C 是嚴重警訊，需加強字音字形與基本閱讀","數學 B+ 表現穩健，多做歷屆試題穩固 B++","英文維持 B 級實力，加強聽力獲取基本分","寫作 0 分需警惕，下次務必動筆寫滿規定行數","重新分配讀書時間，給予國文科更多的關注"] },
-        { id: 7, name: "梁澄祐", rank: "戰士白銀 I", score: 18, cRank: 27, sRank: 460, dRank: 6423, grades: {ch:"B", en:"C", ma:"C", sc:"B", so:"B"}, s: ["英數兩科擇一優先脫離 C 級，建立學習信心","國文自然維持 B 級盤面，保住基本分數","加強英文 1200 基本單字，提升基本題答對率","數學練習基礎運算，確保非選題能拿分","社會科多看地圖與歷史年表，強化地理位置感"] },
-        { id: 8, name: "陳宥予", rank: "戰士白銀 II", score: 15, cRank: 29, sRank: 499, dRank: 7712, grades: {ch:"C", en:"C", ma:"C", sc:"C", so:"C"}, s: ["全科目標：將所有 C 級轉化為 B 級基礎","國文從短篇白話故事開始閱讀，培養專注力","英文熟悉 26 字母與基礎字彙，不可輕言放棄","數學練習小六至國一基礎運算，打掉重練","每天設定 30 分鐘無手機閱讀時間，培養耐性"] },
-        { id: 9, name: "陳祐呈", rank: "星耀等級 III", score: 34, cRank: 7, sRank: 94, dRank: 757, grades: {ch:"A+", en:"A++", ma:"A", sc:"B++", so:"A"}, s: ["保持英文 A++ 極強優勢，它是你的最強王牌","數自兩科衝刺 A+ 門檻，多練習進階題型","國文維持 A+ 穩定度，注意文言文陷阱題","社會科加強史地整合，目標衝向 A+ 滿積分","鎖定頂尖志願，減少考試時的粗心失誤"] },
-        { id: 10, name: "陳睿宏", rank: "勇者黃金 II", score: 23, cRank: 21, sRank: 354, dRank: 3800, grades: {ch:"B", en:"B", ma:"B+", sc:"B", so:"B+"}, s: ["數學 B+ 表現優於平均，建議挑戰 A 級題庫","社會科 B+ 具備衝 A 潛力，多看地圖判讀題","國文加強成語與字音字形，補齊基礎分數","英文固定每日聽力 15 分鐘，培養英文耳","寫作練習層次分明，嘗試使用更多感官描寫"] },
-        { id: 11, name: "黃煒凱", rank: "勇者黃金 I", score: 25, cRank: 14, sRank: 297, dRank: 2988, grades: {ch:"B++", en:"B", ma:"B+", sc:"B+", so:"B+"}, s: ["國文 B++ 離 A 僅一步之遙，加強閱讀測驗精準度","英文 B 級需突破，加強克漏字與長篇閱讀","數學加強幾何與圖形推理，減少運算錯誤","社會科與自然科拚進 B++，維持五科均優","寫作練習題目重點抓取，避免文不對題"] },
-        { id: 12, name: "黃峻維", rank: "星耀等級 II", score: 36, cRank: 6, sRank: 67, dRank: 468, grades: {ch:"A++", en:"B+", ma:"A", sc:"A", so:"A++"}, s: ["維持國社兩科 A++ 巔峰，保持對考題的敏銳度","英文 B+ 為總分短板，需加強單字與閱讀拼回 A","數自兩科穩定 A 級，嘗試挑戰更高難度題型","寫作練習修辭法，目標向 6 級分發起衝刺","注意考試心理壓力，保持作息穩定與專注"] },
-        { id: 13, name: "楊皓宇", rank: "勇者黃金 II", score: 23, cRank: 22, sRank: 358, dRank: 3865, grades: {ch:"B", en:"B", ma:"B+", sc:"B+", so:"B++"}, s: ["發揮社會 B++ 的相對優勢，多做難題衝刺 A","國英兩科穩定 B 級，加強基礎觀念釐清","數自兩科衝刺 B++ 目標，減少非受迫性失誤","英文加強文法結構，練習完整句型的理解","寫作 1 分需注意，請務必按照格式完成文章"] },
-        { id: 14, name: "劉丞恩", rank: "戰士白銀 I", score: 18, cRank: 28, sRank: 463, dRank: 6492, grades: {ch:"B", en:"C", ma:"B", sc:"C", so:"B"}, s: ["英文、自然兩科優先脫離 C 級區，補強基礎定義","國、數維持 B 級不退步，保住基本等級分","社會科加強史地整合邏輯，尋求 B+ 機會","英文單字每天背 10 個，積少成多累積語感","寫作 1 分代表架構不全，需學習起承轉合基礎"] },
-        { id: 15, name: "劉宥承", rank: "永恆鑽石 I", score: 31, cRank: 11, sRank: 148, dRank: 1325, grades: {ch:"B++", en:"B+", ma:"A", sc:"B++", so:"B++"}, s: ["數學維持 A 級實力，多練習非選題保持領先","國、自、社三科皆 B++，全力衝刺 A 級積分","英文加強每日聽力練習，將等級拉回 A 級","整體戰力平均，目標是讓每一科都進入 A 區","寫作目標穩定 4 級分，增加文章的敘述厚度"] },
-        { id: 16, name: "劉煥騰", rank: "璀璨傳說 I", score: 39, cRank: 2, sRank: 40, dRank: 232, grades: {ch:"A++", en:"B+", ma:"A", sc:"A+", so:"A++"}, s: ["維持國、自、社三科頂尖 A++，保持無敵狀態","英文 B+ 為唯一缺口，需專攻閱讀理解補強至 A","數學衝刺 A+ 甚至 A++，減少進階題失分","寫作練習個人感悟與體悟，目標挑戰 6 級分","目標鎖定彰中第一志願，穩定發揮必能達成"] },
-        { id: 17, name: "洪湘芸", rank: "守護白金 II", score: 27, cRank: 13, sRank: 234, dRank: 2191, grades: {ch:"B++", en:"B+", ma:"C", sc:"B+", so:"A+"}, s: ["穩固社會 A+ 頂尖優勢，維持高水準發揮","數學 C 級需儘速補回基礎運算與代數基礎","國文 B++ 離 A 僅差臨門一腳，加強文言文","寫作 5 級分是巨大優勢，多寫作保持手感","建立數學錯題集，針對基礎觀念逐一釐清"] },
-        { id: 18, name: "胡語彤", rank: "勇者黃金 I", score: 25, cRank: 16, sRank: 303, dRank: 3117, grades: {ch:"B", en:"B+", ma:"B++", sc:"B++", so:"B"}, s: ["數自兩科穩定在 B++，針對弱點單元練習衝 A","國、英、社三科需拚進 B++，達成全面均衡","加強數學非選題型練習，爭取額外加分","社會科強化公民與法律概念，減少生活題出錯","多做歷屆試題，熟悉國三下學期的考試節奏"] },
-        { id: 19, name: "張晏翎", rank: "勇者黃金 I", score: 24, cRank: 17, sRank: 329, dRank: 3352, grades: {ch:"B+", en:"B", ma:"A", sc:"B+", so:"B"}, s: ["發揮數學 A 級優勢，確保基礎題與中檔題全拿","國、自兩科衝刺 B++，目標是跨入 A 級門檻","英文 B 級需加強基礎閱讀，補強文法缺口","整理自然科錯題本，特別是理化計算部分","寫作練習豐富文章內容，目標穩定在 4 級分"] },
-        { id: 20, name: "張凱薰", rank: "勇者黃金 II", score: 23, cRank: 23, sRank: 365, dRank: 3981, grades: {ch:"B+", en:"B+", ma:"A", sc:"C", so:"B"}, s: ["自然 C 級需從課本基礎概念重新讀起，脫 C 為先","數學 A 級需持續維持，避免因難題而受挫","國、英兩科穩定在 B+，目標是拚進 B++","社會科加強圖表解讀，補強地理與歷史時序","調整讀書比例，將 40% 的時間分配給自然科"] },
-        { id: 21, name: "許晶融", rank: "勇者黃金 I", score: 24, cRank: 18, sRank: 333, dRank: 3372, grades: {ch:"B+", en:"C", ma:"B+", sc:"B++", so:"B+"}, s: ["自然已達 B++，針對弱點章節衝刺 A 級積分","英文 C 級需拉回 B，先背熟基本 1200 單字","國、數兩科維持 B+ 水準，減少粗心失分","加強英文單字量與詞性變化，練習基本句型","國文多做文言文語感練習，挑戰 B++"] },
-        { id: 22, name: "黃筱菁", rank: "璀璨傳說 II", score: 37, cRank: 3, sRank: 54, dRank: 357, grades: {ch:"A+", en:"B+", ma:"B++", sc:"A+", so:"A++"}, s: ["國、自、社三科 A+ 以上表現極佳，維持優勢","英文 B+ 為上分最大瓶頸，需增加單字廣度","數學衝刺 A 級門檻，多做非選題與進階幾何","寫作維持 5 級分高水準，練習更多修辭法","目標鎖定頂尖高中，全速補強英數弱項"] },
-        { id: 23, name: "黃心渝", rank: "永恆鑽石 II", score: 32, cRank: 9, sRank: 133, dRank: 1126, grades: {ch:"B++", en:"B+", ma:"A++", sc:"B++", so:"B+"}, s: ["數學 A++ 為頂尖實力，需持續維持高難度題感","國、自、社三科均有 B++ 以上基礎，具衝 A 潛力","英文補強基礎閱讀測驗，每天聽 15 分鐘英文","社會科穩定發揮 B+，建議加強公民議題理解","寫作目標 5 級分，嘗試增加個人體悟敘事"] },
-        { id: 24, name: "童若瑄", rank: "璀璨傳說 II", score: 37, cRank: 5, sRank: 59, dRank: 393, grades: {ch:"A+", en:"A", ma:"A", sc:"A+", so:"A++"}, s: ["五科全 A 以上且極為平均，表現非常優越","自然與國文挑戰 A++，針對難題深入研讀","社會科維持 A++ 優勢，成為穩定的積分來源","寫作穩定 4 級分，目標是練習更深刻的結尾","注意考試時間分配，避免在單一難題卡關"] },
-        { id: 25, name: "黃寀菡", rank: "戰士白銀 II", score: 15, cRank: 29, sRank: 499, dRank: 7712, grades: {ch:"C", en:"C", ma:"C", sc:"C", so:"C"}, s: ["首要目標：脫離全 C 窘境，先讓 2 科變為 B","從基礎國文課文抓起，熟悉課文重點與生字","英文背誦最常用的基礎單字，爭取基本分","數學練習加減乘除與分數運算，不放棄基礎題","建立每天定時讀書 30 分鐘的習慣，培養定力"] },
-        { id: 26, name: "詹沛璇", rank: "勇者黃金 II", score: 23, cRank: 19, sRank: 339, dRank: 3502, grades: {ch:"B", en:"B+", ma:"B+", sc:"B", so:"B"}, s: ["發揮寫作 5 級分的高分優勢，保持感性筆觸","英文與數學 B+ 具備進步空間，衝刺 B++","國、自、社回歸課本重點，補強基礎觀念","英文加強聽力掌握度，這是最快上分的方法","針對模擬考錯題進行分類，找出反覆出錯點"] },
-        { id: 27, name: "廖婕渝", rank: "勇者黃金 III", score: 20, cRank: 24, sRank: 412, dRank: 4886, grades: {ch:"B", en:"B", ma:"B", sc:"B", so:"B"}, s: ["五科表現極為均衡，全部維持在 B 級不退步","建立各科錯題記錄系統，分析常錯的單元","國文嘗試增加白話文閱讀量，提升語感","嘗試提升一門強項至 B+，先從社會科開始","每日規律作息，確保留在課堂上的專注力"] },
-        { id: 28, name: "劉芮瑜", rank: "璀璨傳說 II", score: 37, cRank: 4, sRank: 55, dRank: 363, grades: {ch:"A++", en:"B", ma:"A+", sc:"A", so:"A"}, s: ["國文 A++ 為最強項，請繼續保持閱讀手感","數學 A+ 挑戰衝刺 A++，針對幾何難題破題","英文 B 級為唯一隱憂，需專攻閱讀理解至 A","自社兩科穩定 A 級，目標是全科皆 A 以上","寫作練習文章架構，目標穩定 5 級分優勢"] },
-        { id: 29, name: "潘曉靚", rank: "永恆鑽石 II", score: 33, cRank: 8, sRank: 109, dRank: 908, grades: {ch:"A+", en:"A", ma:"B++", sc:"A", so:"B++"}, s: ["國、英、自三科 A 級優勢穩定，維持讀書節奏","數、社兩科 B++ 衝刺 A 級，針對弱項補強","加強理化計算題型練習，確保 A 級積分","社會科鞏固法律與政治篇章，這是衝 A 關鍵","寫作增加修辭法運用，豐富文章視覺美感"] },
-        { id: 30, name: "謝沛璇", rank: "戰場傳說 I", score: 41, cRank: 1, sRank: 29, dRank: 99, grades: {ch:"A++", en:"A+", ma:"A", sc:"A++", so:"A++"}, s: ["維持國、自、社三科 A++ 巔峰，保持領先地位","衝刺英、數 A++，達成全科「五路神裝」滿分","寫作維持 5 級分優勢，多臨摹 6 級分範文","減少高難度題目中的非受迫性失誤與粗心","目標鎖定頂尖第一志願，保持心態穩定與自信"] }
+        { id: 1, name: "王昱叡", rank: "榮耀星辰", score: 30, prevScore: 25, cRank: 11, sRank: 176, dRank: 305, grades: {ch:"B+", en:"B", ma:"A", sc:"B+", so:"A++"}, s: ["排名大幅進步！社會 A++ 展現王者實力。","目標：英文若衝上 B+，戰力將跨越下一階。"] },
+        { id: 2, name: "吳柏勳", rank: "不屈青銅", score: 26, prevScore: 27, cRank: 15, sRank: 260, dRank: 480, grades: {ch:"B", en:"B", ma:"B++", sc:"B++", so:"B++"}, s: ["表現穩定，各科戰力分佈平均。","目標：強化國文基礎，爭取衝刺 B+。"] },
+        { id: 3, name: "李丞諭", rank: "待覺醒", score: 24, prevScore: 23, cRank: 21, sRank: 311, dRank: 586, grades: {ch:"B", en:"C", ma:"B++", sc:"B", so:"A"}, s: ["數學與社會表現不俗，社會 A 級是亮點。","覺醒任務：優先拯救英文 C 級，總分將瞬間暴漲。"] },
+        { id: 4, name: "李冠安", rank: "待覺醒", score: 24, prevScore: 18, cRank: 18, sRank: 302, dRank: 570, grades: {ch:"B+", en:"B", ma:"B", sc:"B", so:"B++"}, s: ["顯著進步！從班排 22 升至 18 名。","建議：保持社會科優勢，加強英文練習。"] },
+        { id: 5, name: "沈柏彥", rank: "不屈青銅", score: 26, prevScore: 29, cRank: 13, sRank: 241, dRank: 445, grades: {ch:"B++", en:"C", ma:"B+", sc:"B+", so:"B++"}, s: ["四科皆有 B+ 以上實力，戰力強勁。","目標：攻克英文 C 級障礙，你是潛在的黑馬。"] },
+        { id: 6, name: "張志宗", rank: "待覺醒", score: 19, prevScore: 19, cRank: 25, sRank: 428, dRank: 924, grades: {ch:"C", en:"B", ma:"B", sc:"C", so:"B++"}, s: ["戰力分佈呈現極端，社會表現優異。","建議：優先分配時間給國文與自然。"] },
+        { id: 7, name: "梁睿祐", rank: "待覺醒", score: 18, prevScore: 18, cRank: 26, sRank: 437, dRank: 966, grades: {ch:"B", en:"C", ma:"B", sc:"B", so:"B"}, s: ["表現持平，建議從最有把握的一科開始衝刺。"] },
+        { id: 8, name: "陳冠予", rank: "待覺醒", score: 6, prevScore: 15, cRank: 30, sRank: 507, dRank: 1204, grades: {ch:"C", en:"C", ma:"C", sc:"C", so:"C"}, s: ["目前處於低谷，不要灰心，找出一科喜歡的開始突破。"] },
+        { id: 9, name: "陳冠呈", rank: "榮耀星辰", score: 33, prevScore: 34, cRank: 9, sRank: 128, dRank: 206, grades: {ch:"B++", en:"A", ma:"B++", sc:"B++", so:"A+"}, s: ["穩居前 10 名，英文 A 級是你的堅強盾牌。","目標：國文與數學衝上 A 級，即可解鎖彰中/彰女門檻。"] },
+        { id: 10, name: "陳俊宏", rank: "榮耀星辰", score: 29, prevScore: 26, cRank: 12, sRank: 185, dRank: 320, grades: {ch:"B++", en:"B++", ma:"A", sc:"B+", so:"B++"}, s: ["數學衝上 A 級，進步有目共睹。","建議：將社會或英文其中一科推向 A 級。"] },
+        { id: 11, name: "黃冠凱", rank: "待覺醒", score: 24, prevScore: 22, cRank: 17, sRank: 292, dRank: 541, grades: {ch:"B", en:"B", ma:"B", sc:"B", so:"B++"}, s: ["全科無 C 級，底子非常紮實。","建議：專攻數學或社會，尋求第一個 A。"] },
+        { id: 12, name: "黃峻唯", rank: "璀璨傳說", score: 37, prevScore: 30, cRank: 6, sRank: 62, dRank: 90, grades: {ch:"A", en:"A", ma:"B++", sc:"A", so:"A++"}, s: ["大爆發！校排衝入前 100，三科 A 級一科 A++。","目標：數學 B++ 是最後一道防線，衝上去就是王者。"] },
+        { id: 13, name: "楊承宇", rank: "不屈青銅", score: 22, prevScore: 21, cRank: 22, sRank: 354, dRank: 714, grades: {ch:"B", en:"B", ma:"B+", sc:"B", so:"B++"}, s: ["表現穩健，國、英兩科需加強基礎閱讀。"] },
+        { id: 14, name: "劉家恩", rank: "待覺醒", score: 16, prevScore: 18, cRank: 27, sRank: 475, dRank: 1115, grades: {ch:"C", en:"B", ma:"C", sc:"B", so:"C"}, s: ["目前三科 C 級，建議先將國文提升至 B 以利理解題目。"] },
+        { id: 15, name: "劉柏承", rank: "榮耀星辰", score: 33, prevScore: 29, cRank: 8, sRank: 122, dRank: 195, grades: {ch:"B++", en:"A+", ma:"A", sc:"B++", so:"B++"}, s: ["雙 A 級選手，英文 A+ 非常出色。","建議：國社兩科強化，目標鎖定員中以上。"] },
+        { id: 16, name: "劉煥騰", rank: "璀璨傳說", score: 40, prevScore: 39, cRank: 2, sRank: 32, dRank: 39, grades: {ch:"A++", en:"B++", ma:"A+", sc:"A++", so:"A++"}, s: ["全班唯二的 A++ 三冠王！彰中穩定錄取。","戰術：英文是邁向全區前 10 名的唯一阻礙。"] },
+        { id: 17, name: "洪千芸", rank: "不屈青銅", score: 26, prevScore: 25, cRank: 14, sRank: 245, dRank: 450, grades: {ch:"B++", en:"B+", ma:"B", sc:"B+", so:"B++"}, s: ["排名微幅上升，戰力分布均衡。"] },
+        { id: 18, name: "胡采彤", rank: "不屈青銅", score: 25, prevScore: 26, cRank: 16, sRank: 287, dRank: 528, grades: {ch:"B", en:"B+", ma:"B++", sc:"B+", so:"B"}, s: ["數學與英文具有優勢，需補強國、社背誦科目。"] },
+        { id: 19, name: "張芯翊", rank: "待覺醒", score: 24, prevScore: 22, cRank: 19, sRank: 303, dRank: 572, grades: {ch:"B+", en:"B", ma:"B", sc:"B", so:"A"}, s: ["社會 A 級是你的強項，帶動整體排名。"] },
+        { id: 20, name: "張慈薰", rank: "不屈青銅", score: 21, prevScore: 26, cRank: 23, sRank: 359, dRank: 727, grades: {ch:"B+", en:"B+", ma:"B", sc:"C", so:"B"}, s: ["自然科意外掉入 C 級，需找回節奏。"] },
+        { id: 21, name: "許芯融", rank: "不屈青銅", score: 20, prevScore: 25, cRank: 24, sRank: 419, dRank: 904, grades: {ch:"C", en:"C", ma:"B+", sc:"B", so:"B++"}, s: ["國英雙 C 是目前最大阻力，重點補強單字。"] },
+        { id: 22, name: "黃筱菁", rank: "璀璨傳說", score: 39, prevScore: 38, cRank: 4, sRank: 41, dRank: 53, grades: {ch:"A++", en:"A", ma:"B+", sc:"A+", so:"A+"}, s: ["全方位高戰力選手，彰女穩定錄取。"] },
+        { id: 23, name: "黃郁渝", rank: "榮耀星辰", score: 31, prevScore: 30, cRank: 10, sRank: 157, dRank: 263, grades: {ch:"B+", en:"B+", ma:"A+", sc:"B++", so:"A"}, s: ["數學 A+ 展現極強邏輯能力，整體戰力上升。"] },
+        { id: 24, name: "董若瑄", rank: "璀璨傳說", score: 39, prevScore: 36, cRank: 5, sRank: 16, dRank: 57, grades: {ch:"A", en:"A+", ma:"A+", sc:"A+", so:"A"}, s: ["全科皆 A 以上！戰力驚人且均衡，校排表現優異。"] },
+        { id: 25, name: "黃家菡", rank: "待覺醒", score: 15, prevScore: 17, cRank: 28, sRank: 487, dRank: 1141, grades: {ch:"C", en:"C", ma:"B", sc:"C", so:"C"}, s: ["目前戰力處於待覺醒狀態，只要一科衝上 B 即可跨越門檻。"] },
+        { id: 26, name: "詹佳璇", rank: "榮耀星辰", score: 29, prevScore: 28, cRank: 10, sRank: 248, dRank: 1198, grades: {ch:"B", en:"B+", ma:"B+", sc:"B+", so:"B+"}, s: ["全科 B+ 展現強大穩定性，目標是尋求 A 級突破。"] },
+        { id: 27, name: "廖心渝", rank: "待覺醒", score: 19, prevScore: 19, cRank: 24, sRank: 215, dRank: 904, grades: {ch:"B", en:"B", ma:"C", sc:"C", so:"B"}, s: ["國、英、社底子不錯，優先補強自然基礎知識。"] },
+        { id: 28, name: "劉芮瑜", rank: "璀璨傳說", score: 40, prevScore: 37, cRank: 3, sRank: 13, dRank: 42, grades: {ch:"A++", en:"A+", ma:"A", sc:"A+", so:"A++"}, s: ["三冠王！校排第 13 名，目標直指考區前 20。"] },
+        { id: 29, name: "潘宥靚", rank: "榮耀星辰", score: 35, prevScore: 27, cRank: 7, sRank: 45, dRank: 133, grades: {ch:"A", en:"B++", ma:"A", sc:"B++", so:"A+"}, s: ["進步神速！從班排 10 名衝入第 7 名。"] },
+        { id: 30, name: "謝沛璇", rank: "至尊傳說", score: 42, prevScore: 40, cRank: 1, sRank: 6, dRank: 23, grades: {ch:"A+", en:"A+", ma:"A", sc:"A++", so:"A++"}, s: ["308 班最強戰力！校排前 10，彰女穩定錄取。"] }
     ];
 
+    // --- 2. 學校門檻設定 ---
     const thresholds = [
-        { score: 105, name: "優質技術型高中" },
-        { score: 112, name: "溪湖高中" },
-        { score: 118, name: "員林高中" },
-        { score: 121, name: "彰中 / 彰女" },
-        { score: 135, name: "全區巔峰王者" }
+        { score: 104, name: "優質技術高中門檻" },
+        { score: 109, name: "員家家政 / 北家商經" },
+        { score: 112, name: "溪湖高中 / 彰商商經" },
+        { score: 116, name: "彰工電機 / 彰商應外" },
+        { score: 120, name: "彰中 / 彰女" }
     ];
 
-    const selectEl = document.getElementById('userSelect');
-    studentDB.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.id; opt.textContent = `${s.id < 10 ? '0'+s.id : s.id} - ${s.name}`;
-        selectEl.appendChild(opt);
-    });
+    // --- 3. 初始化選單 (這部分解決選單跑不出來的問題) ---
+    window.onload = function() {
+        const selectEl = document.getElementById('userSelect');
+        if (selectEl) {
+            selectEl.innerHTML = '<option value="">-- 請選擇英雄 --</option>';
+            studentDB.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.id < 10 ? '0'+s.id : s.id} - ${s.name}`;
+                selectEl.appendChild(opt);
+            });
+        }
+    };
 
+    // --- 4. 登入邏輯 ---
     function handleLogin() {
-        const sid = selectEl.value;
+        const sid = document.getElementById('userSelect').value;
         const inputPass = document.getElementById('userPass').value;
         const savedPass = localStorage.getItem('pwd_' + sid) || "308" + (sid < 10 ? '0'+sid : sid);
-        if(sid && inputPass === savedPass) {
+        
+        if(!sid) { alert("請選擇學生姓名"); return; }
+        if(inputPass === savedPass) {
             document.getElementById('loginWrapper').style.opacity = "0";
-            setTimeout(() => { document.getElementById('loginWrapper').style.display = "none"; showReport(sid); }, 600);
-        } else alert("認證錯誤，請重新輸入");
+            setTimeout(() => { 
+                document.getElementById('loginWrapper').style.display = "none"; 
+                showReport(sid); 
+            }, 600);
+        } else {
+            alert("密碼錯誤，請重新輸入");
+        }
     }
 
+    // --- 5. 顯示報表內容 ---
     function showReport(id) {
         const s = studentDB.find(item => item.id == id);
         const total = 90 + s.score;
@@ -196,20 +209,39 @@
         document.getElementById('sRank').innerText = s.sRank;
         document.getElementById('dRank').innerText = s.dRank;
 
-        // 更新 XP 長條圖邏輯
+        // 成長標籤
+        const growthTag = document.getElementById('growthTag');
+        const diff = s.score - s.prevScore;
+        if (diff > 0) {
+            growthTag.innerText = `▲ 與上次相比進步 ${diff} 分`;
+            growthTag.className = "growth-tag growth-up";
+        } else if (diff < 0) {
+            growthTag.innerText = `▼ 與上次相比退步 ${Math.abs(diff)} 分`;
+            growthTag.className = "growth-tag growth-down";
+        } else {
+            growthTag.innerText = "● 戰力持平";
+            growthTag.style.background = "#475569";
+        }
+
+        // XP 進度條
         const nextGoal = thresholds.find(t => t.score > total) || thresholds[thresholds.length-1];
         const prevGoalScore = (thresholds.slice().reverse().find(t => t.score <= total)?.score || 90);
         const progress = ((total - prevGoalScore) / (nextGoal.score - prevGoalScore)) * 100;
-
-        document.getElementById('nextLevelName').innerText = `NEXT GOAL: ${nextGoal.name}`;
-        document.getElementById('xpRemaining').innerText = nextGoal.score > total ? `REMAINING: ${nextGoal.score - total} XP` : "MAX LEVEL";
+        document.getElementById('nextLevelName').innerText = `下一目標：${nextGoal.name}`;
+        document.getElementById('xpRemaining').innerText = nextGoal.score > total ? `尚需：${nextGoal.score - total} 分` : "頂尖戰力";
         document.getElementById('xpFill').style.width = Math.max(10, progress) + "%";
 
-        const orb = document.getElementById('rankOrb');
-        orb.innerText = s.score > 35 ? "L" : s.score > 25 ? "G" : "B";
-        orb.style.color = s.score > 35 ? "var(--gold)" : s.score > 25 ? "var(--accent)" : "#94a3b8";
-        orb.style.borderColor = orb.style.color;
+        // 雷達圖
+        renderChart(s.grades);
+        
+        // 落點預測
+        let pSchool = "待加強";
+        for (let i = thresholds.length-1; i >= 0; i--) {
+            if (total >= thresholds[i].score) { pSchool = thresholds[i].name; break; }
+        }
+        document.getElementById('predictSchool').innerText = pSchool;
 
+        // 戰略清單
         const list = document.getElementById('strategyList');
         list.innerHTML = "";
         s.s.forEach(text => {
@@ -218,16 +250,14 @@
             div.style.background = "rgba(255,255,255,0.03)"; div.style.borderLeft = "4px solid var(--accent)";
             div.innerText = text; list.appendChild(div);
         });
-
-        renderChart(s.grades);
-        document.getElementById('predictSchool').innerText = total >= 121 ? "彰中 / 彰女" : total >= 112 ? "溪湖高中" : "員家 / 北家";
     }
 
     function renderChart(g) {
-        // 5C 權重修正：C=20，讓 5C 學生的雷達圖變得很小，符合「待加強」的視覺邏輯
         const map = { "A++": 100, "A+": 92, "A": 85, "B++": 72, "B+": 62, "B": 50, "C": 20 };
         const ctx = document.getElementById('radarChart').getContext('2d');
-        new Chart(ctx, {
+        // 先銷毀舊圖表避免重疊
+        if(window.myRadar) window.myRadar.destroy();
+        window.myRadar = new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: ['國文', '英文', '數學', '自然', '社會'],
@@ -246,21 +276,18 @@
         });
     }
 
+    // 密碼修改邏輯
     function openPwdModal() { document.getElementById('overlay').style.display = 'block'; document.getElementById('pwdModal').style.display = 'block'; }
     function closePwdModal() { document.getElementById('overlay').style.display = 'none'; document.getElementById('pwdModal').style.display = 'none'; }
     function submitNewPwd() {
-        const sid = selectEl.value;
+        const sid = document.getElementById('userSelect').value;
         const oldP = document.getElementById('oldPwd').value;
         const newP = document.getElementById('newPwd').value;
         const savedPass = localStorage.getItem('pwd_' + sid) || "308" + (sid < 10 ? '0'+sid : sid);
-        if (oldP === savedPass && newP.length >= 4) { 
-            localStorage.setItem('pwd_' + sid, newP); 
-            alert("密碼修改成功！"); 
-            closePwdModal(); 
-        } else { 
-            alert("舊密碼錯誤或新密碼太短（需4碼以上）"); 
-        }
+        if (oldP === savedPass && newP.length >= 4) { localStorage.setItem('pwd_' + sid, newP); alert("修改成功！"); closePwdModal(); }
+        else alert("驗證錯誤或新密碼太短");
     }
+
 </script>
 </body>
 </html>
