@@ -3,323 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>308 英雄戰力分析系統 V4.8</title>
+    <title>908 英雄聯盟戰力管理系統</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #22d3ee; --gold: #fbbf24; --math: #10b981; --up: #4ade80; --down: #f87171; --xp: #8b5cf6; }
-        body { background: var(--bg); color: #f8fafc; font-family: -apple-system, "Microsoft JhengHei", sans-serif; margin: 0; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 95%; max-width: 600px; padding: 20px; }
+        :root { 
+            --bg: #020617; --card: rgba(30, 41, 59, 0.8); 
+            --accent: #22d3ee; --gold: #fbbf24; --text: #f8fafc; 
+            --xp: #8b5cf6; --danger: #f43f5e; --success: #4ade80;
+            --rank-bg: rgba(15, 23, 42, 0.6);
+        }
         
-        /* 登入 UI */
-        .login-box { background: var(--card); padding: 40px 20px; border-radius: 28px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
-        select, input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 2px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-size: 1rem; }
-        .main-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #0ea5e9, #22d3ee); border: none; border-radius: 12px; color: #0f172a; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .sub-btn { background: none; border: 1px solid #475569; color: #94a3b8; padding: 10px; border-radius: 8px; cursor: pointer; margin-top: 15px; width: 100%; }
+        body { 
+            background: radial-gradient(circle at top, #1e293b 0%, #020617 100%); 
+            color: var(--text); font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            margin: 0; padding-bottom: 60px; overflow-x: hidden;
+            font-size: 0.95rem; 
+        }
 
-        /* 報表區域 */
-        #reportSection { display: none; background: var(--card); border-radius: 28px; overflow: hidden; animation: fadeIn 0.6s ease; margin-bottom: 50px; border: 1px solid rgba(255,255,255,0.1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .container { width: 92%; max-width: 680px; margin: auto; padding: 10px; }
 
-        .header { background: #1e293b; padding: 25px; text-align: center; border-bottom: 4px solid var(--accent); }
-        .rank-orb { width: 60px; height: 60px; border: 3px solid var(--accent); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: rgba(0,0,0,0.2); }
+        .hero-title { 
+            font-size: 2.2rem; 
+            font-weight: 900; 
+            text-align: center; 
+            margin-top: 2vh;
+            background: linear-gradient(to right, #fff, var(--accent), #fff);
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            animation: glowText 3s infinite;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            display: block;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            background: none;
+            -webkit-text-fill-color: #94a3b8;
+        }
+
+        @keyframes glowText { 0%, 100% { filter: drop-shadow(0 0 5px rgba(34,211,238,0.3)); } 50% { filter: drop-shadow(0 0 15px rgba(34,211,238,0.6)); } }
+
+        .card { 
+            background: var(--card); backdrop-filter: blur(15px); padding: 22px; border-radius: 28px; 
+            border: 1px solid rgba(255,255,255,0.1); margin-top: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: cardSlide 0.6s ease-out;
+        }
+        @keyframes cardSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        h3 { font-size: 1.2rem; color: var(--gold); margin: 0 0 15px 0; border-left: 4px solid var(--accent); padding-left: 10px; }
         
-        .score-display { display: grid; grid-template-columns: 1fr 1fr; background: #0f172a; padding: 15px; text-align: center; border-bottom: 1px solid #334155; }
-        .score-box b { display: block; font-size: 1.6rem; color: var(--gold); margin-top: 5px; }
+        .rank-dashboard {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            margin-bottom: 20px; background: var(--rank-bg); padding: 15px;
+            border-radius: 18px; border: 1px solid rgba(34, 211, 238, 0.3);
+        }
+        .rank-box { text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
+        .rank-box:last-child { border-right: none; }
+        .rank-label { font-size: 0.7rem; color: var(--accent); font-weight: bold; text-transform: uppercase; }
+        .rank-value { font-size: 1.4rem; color: var(--gold); font-weight: 900; margin-top: 5px; }
+        .rank-unit { font-size: 0.7rem; color: #64748b; margin-left: 2px; }
 
-        /* 三項排名 */
-        .rank-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; background: rgba(0,0,0,0.3); padding: 15px; gap: 5px; text-align: center; }
-        .rank-item small { color: var(--accent); font-size: 0.7rem; display: block; margin-bottom: 3px; }
-        .rank-item span { font-size: 0.9rem; font-weight: bold; }
+        select, input { 
+            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 2px solid #334155; 
+            background: rgba(15, 23, 42, 0.9); color: white; font-size: 1rem; box-sizing: border-box;
+        }
+        .main-btn { 
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #0ea5e9, #22d3ee); 
+            border: none; border-radius: 14px; color: #0f172a; font-size: 1.1rem; font-weight: 800; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .main-btn:active { transform: scale(0.97); }
 
-        /* 進度條 */
-        .xp-container { background: #1e293b; padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .xp-header { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 8px; }
-        .xp-bar-bg { height: 12px; background: #0f172a; border-radius: 6px; overflow: hidden; position: relative; }
-        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--xp)); width: 0%; transition: 1.2s; }
+        .hero-icon { font-size: 4rem; animation: float 3s infinite ease-in-out; display: block; margin: auto; text-align: center; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-        .content { padding: 20px; }
-        .chart-container { height: 250px; margin-bottom: 20px; }
-        
-        /* 輸入面板 */
-        .input-panel { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; border: 1px dashed var(--accent); margin-top: 20px; }
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        
-        /* 分析結果樣式 */
-        .evo-card { background: #0f172a; border-radius: 15px; padding: 15px; margin-top: 20px; border-left: 4px solid var(--gold); display: none; }
-        .evo-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
-        .tag { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-left: 5px; }
-        .tag-up { background: var(--up); color: #064e3b; }
-        .tag-down { background: var(--down); color: #450a0a; }
+        .side-box { padding: 12px; border-radius: 14px; font-size: 0.85rem; line-height: 1.5; border: 1px solid rgba(255,255,255,0.1); }
+        .strength-msg { border-left: 4px solid var(--success); background: rgba(74, 222, 128, 0.1); }
+        .weakness-msg { border-left: 4px solid var(--danger); background: rgba(244, 63, 94, 0.1); }
 
-        .strategy-item { padding: 12px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent); margin-bottom: 8px; border-radius: 0 8px 8px 0; font-size: 0.85rem; line-height: 1.5; }
-
-        /* 彈窗 */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 400px; background: #1e293b; border-radius: 20px; padding: 25px; z-index: 1000; border: 1px solid var(--accent); box-shadow: 0 0 50px #000; }
-        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 999; }
+        @media (max-width: 480px) { .hero-title { font-size: 1.8rem; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loginWrapper" class="login-box">
-        <div style="font-size: 50px;">🛡️</div>
-        <h1>308 英雄戰力系統</h1>
-        <p style="color:#94a3b8; font-size: 0.8rem;">V4.8 旗艦終極版</p>
-        <select id="userSelect"><option value="">-- 請選擇英雄 --</option></select>
-        <input type="password" id="userPass" placeholder="輸入密碼 (308+座號)">
-        <button class="main-btn" onclick="handleLogin()">解鎖戰力數據</button>
-        <button class="sub-btn" onclick="openPwdModal()">修改個人密碼</button>
+    <div id="loginWrapper">
+        <div class="hero-icon">🛡️</div>
+        <h1 class="hero-title">
+            908 英雄聯盟戰力管理系統
+            <span class="hero-subtitle">V1.5 2026 JAE Plan</span>
+        </h1>
+
+        <div class="card">
+            <h3>系統登入</h3>
+            <select id="userSelect"><option value="">-- 請選擇座號 --</option></select>
+            <input type="password" id="userPass" placeholder="輸入 6 位英雄金鑰">
+            <button class="main-btn" onclick="handleLogin()">進入系統</button>
+            <div style="margin-top: 15px; text-align: center;">
+                <button onclick="adminResetPrompt()" style="background: none; border: none; color: #475569; font-size: 0.8rem; text-decoration: underline; cursor: pointer;">管理員入口 (系統設定)</button>
+            </div>
+        </div>
     </div>
 
-    <div id="reportSection">
-        <div class="header">
-            <div class="rank-orb" id="rankOrb">--</div>
-            <h2 id="displayName" style="margin:0">--</h2>
-            <div id="predictSchool" style="color:var(--accent); font-size:1rem; margin-top:5px; font-weight:bold">--</div>
+    <div id="reportSection" style="display:none;">
+        <div class="card" style="text-align: center;">
+            <div id="heroEmoji" style="font-size: 3.5rem; margin-bottom: 5px;">🎖️</div>
+            <h2 id="displayName" style="font-size: 2rem; margin: 0;">--</h2>
+            <div id="heroRank" style="color:var(--accent); font-size: 1.2rem; font-weight:900; letter-spacing: 2px;">--</div>
         </div>
 
-        <div class="score-display">
-            <div class="score-box"><small>目前等級點數</small><b id="displayScore">--</b></div>
-            <div class="score-box"><small>下一等級差距</small><b id="pointsGap" style="color:var(--up)">--</b></div>
-        </div>
-
-        <div class="rank-grid">
-            <div class="rank-item"><small>🏆 班級名次</small><span id="cRank">--</span></div>
-            <div class="rank-item"><small>🥈 校內名次</small><span id="sRank">--</span></div>
-            <div class="rank-item"><small>🌏 考區名次</small><span id="dRank">--</span></div>
-        </div>
-
-        <div class="xp-container">
-            <div class="xp-header"><span id="nextTierLabel">載入中...</span><span id="xpPercentText">0%</span></div>
-            <div class="xp-bar-bg"><div id="xpFill" class="xp-bar-fill"></div></div>
-        </div>
-
-        <div class="content">
-            <div class="chart-container"><canvas id="radarChart"></canvas></div>
-
-            <div style="margin-bottom: 25px;">
-                <h4 style="margin:0 0 10px; font-size:0.9rem; color:var(--accent)">⏳ 建議修煉時間比 (按弱項權重)</h4>
-                <div id="timeBar" style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom:5px"></div>
-                <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#94a3b8">
-                    <span>🔴 弱項補救</span><span>🟡 衝刺 A 級</span><span>🟢 強項守備</span>
+        <div class="card">
+            <div class="rank-dashboard">
+                <div class="rank-box">
+                    <div class="rank-label">Class 班排</div>
+                    <div class="rank-value" id="val_v">--</div>
+                </div>
+                <div class="rank-box">
+                    <div class="rank-label">School 校排</div>
+                    <div class="rank-value" id="val_y">--</div>
+                </div>
+                <div class="rank-box">
+                    <div class="rank-label">Dist 區排</div>
+                    <div class="rank-value" id="val_ab">--</div>
                 </div>
             </div>
 
-            <h3 style="color:var(--accent); font-size:1.1rem">⚔️ 核心戰術分析</h3>
-            <div id="strategyList"></div>
-
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
-
-            <div class="input-panel">
-                <h3 style="margin-top:0; color:var(--gold); font-size:1rem">🔮 模擬/最新成績輸入分析</h3>
-                <div class="grid-inputs" id="simInputs"></div>
-                <input type="number" id="inNewDRank" placeholder="輸入最新考區名次 (選填)">
-                <button class="main-btn" style="margin-top:10px; background:var(--xp); color:white" onclick="updateEvolution()">執行進化比對分析</button>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="color:var(--accent); font-weight:bold; font-size:1rem;">⚔️ 戰力量尺 (滿分45級分)</span>
+                <span id="xpLabel" style="color:var(--gold); font-weight:900; font-size:1.1rem;">0 / 45</span>
+            </div>
+            
+            <div style="position: relative; margin-top: 10px; padding-bottom: 25px;">
+                <div style="height:24px; background:#1e293b; border-radius:12px; overflow:hidden; position: relative; z-index: 1;">
+                    <div id="xpBarFill" style="height:100%; width:0%; background:linear-gradient(90deg, var(--xp), var(--accent)); transition: 1.2s ease-out;"></div>
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: space-between; pointer-events: none; padding: 0 1px; box-sizing: border-box;">
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                        <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 100%;"></div>
+                    </div>
+                </div>
+                <div style="position: absolute; width: 100%; left: 0; margin-top: 5px; display: flex; justify-content: space-between; padding: 0 1px; box-sizing: border-box;">
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">0</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">5</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">10</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">15</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">20</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">25</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">30</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">35</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">40</span>
+                    <span style="color: #64748b; font-size: 0.65rem; width: 0; text-align: center; overflow: visible;">45</span>
+                </div>
             </div>
 
-            <div id="evoReport" class="evo-card">
-                <h4 style="margin:0 0 10px; color:var(--gold)">📈 進退步與策略報告</h4>
-                <div id="evoList"></div>
-                <div id="evoStrategy" style="margin-top:15px"></div>
-            </div>
-
-            <button onclick="location.reload()" class="sub-btn" style="width:100%; margin-top:40px; border:none; color:#64748b;">登出系統</button>
+            <div id="gradeBadges" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; justify-content:center;"></div>
         </div>
-    </div>
 
-    <div id="overlay" class="overlay" onclick="closePwdModal()"></div>
-    <div id="pwdModal" class="modal">
-        <h3>修改密碼</h3>
-        <input type="password" id="oldPwd" placeholder="目前的密碼">
-        <input type="password" id="newPwd" placeholder="新密碼 (至少4位)">
-        <button class="main-btn" onclick="submitNewPwd()">確認修改</button>
-        <button class="sub-btn" onclick="closePwdModal()">取消</button>
+        <div class="card">
+            <h3>📈 戰力成長趨勢 (歷次模擬考)</h3>
+            <div style="height: 250px;">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                <div style="flex:1.2; min-width:260px; height:240px;">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div style="flex:1; min-width:200px; display:flex; flex-direction:column; gap:12px;">
+                    <div id="strengthBox" class="side-box strength-msg">--</div>
+                    <div id="weaknessBox" class="side-box weakness-msg">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border: 1.5px dashed var(--accent);">
+            <h3>⚡ 成就解鎖 (輸入新模考成績) </h3>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;" id="gradeInputs"></div>
+            <div style="margin-top: 10px;">
+                <small style="color:var(--gold); font-weight:bold;">📍 本次模擬考區排 (預覽同步至折線圖)</small>
+                <input type="number" id="in_distRank" placeholder="請輸入區排次">
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+                <button class="main-btn" onclick="syncAndAnalyze()">同步分析數據</button>
+                <button class="main-btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid #475569;" onclick="resetInputsToCurrent()">🧹 清除/恢復預設</button>
+            </div>
+            <button class="main-btn" style="margin-top:10px; background:var(--gold); color:#000;" onclick="saveCurrentRecord()">💾 將此成績存為正式戰報</button>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0; border-left: 4px solid var(--accent); padding-left: 10px;">📂 戰報存檔</h3>
+                <button onclick="clearAllHistory()" style="background:rgba(244,63,94,0.1); border:1px solid var(--danger); color:var(--danger); padding:5px 12px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:bold; border: 1px solid var(--danger);">🧹 全部清除</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+
+        <div class="card">
+            <h3>🎯 目前已開發地圖</h3>
+            <div id="targetList"></div>
+            <div id="finalScoreLabel" style="text-align: right; margin-top: 10px; font-weight: 900; color: var(--accent); font-size: 1.1rem;">--</div>
+        </div>
+
+        <div class="card">
+            <h3>🗓️ 建議修煉週表 </h3>
+            <div style="overflow-x: auto;">
+                <table style="width:100%; font-size: 0.9rem; text-align: center;">
+                    <thead><tr><th>科目</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr></thead>
+                    <tbody id="cramSetupBody"></tbody>
+                </table>
+            </div>
+            <button class="main-btn" style="background:var(--xp); color:white; margin-top:15px;" onclick="generateWeeklySchedule()">重新部署計畫</button>
+            <div style="overflow-x: auto; margin-top: 15px;">
+                <table class="schedule-table" style="width:100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px;">
+                    <thead><tr><th>時段</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th></tr></thead>
+                    <tbody id="weeklyBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="border: 1px solid var(--danger);">
+            <button class="main-btn" style="background:transparent; border:2px solid var(--danger); color:var(--danger);" onclick="location.reload()">登出系統</button>
+        </div>
     </div>
 </div>
 
 <script>
+    const heroKeys = {
+        "1":"582491","2":"193758","3":"620485","4":"847129","5":"319506",
+        "6":"702843","7":"461937","8":"258074","9":"936215","10":"104862",
+        "11":"675129","12":"829403","13":"390571","14":"518246","15":"746390",
+        "16":"285107","17":"953684","18":"402751","19":"631928","20":"874052",
+        "21":"129364","22":"560417","23":"387190","24":"715243","25":"492085",
+        "26":"903176","27":"268419","28":"537092","29":"814620","30":"159384",
+        "admin":"908admin"
+    };
+
     const db = [
-        { id: 1, name: "王昱叡", write: 4, g: {ch:"B+", en:"B", ma:"B++", sc:"B++", so:"A"}, total: 28, c: 12, s: 227, d: 2065 },
-        { id: 2, name: "吳彥勳", write: 3, g: {ch:"B+", en:"B", ma:"A", sc:"B+", so:"B"}, total: 25, c: 15, s: 299, d: 3006 },
-        { id: 3, name: "李致諭", write: 3, g: {ch:"B", en:"C", ma:"A", sc:"B", so:"B+"}, total: 23, c: 20, s: 351, d: 3751 },
-        { id: 4, name: "李晉安", write: 3, g: {ch:"B", en:"C", ma:"B+", sc:"B", so:"B"}, total: 20, c: 25, s: 419, d: 5065 },
-        { id: 5, name: "沈宏彥", write: 4, g: {ch:"A+", en:"B", ma:"A+", sc:"B+", so:"A"}, total: 31, c: 10, s: 142, d: 1250 },
-        { id: 6, name: "張于宗", write: 0, g: {ch:"C", en:"B", ma:"B+", sc:"B", so:"B"}, total: 20, c: 26, s: 427, d: 5326 },
-        { id: 7, name: "梁澄祐", write: 2, g: {ch:"B", en:"C", ma:"C", sc:"B", so:"B"}, total: 18, c: 27, s: 460, d: 6423 },
-        { id: 8, name: "陳宥予", write: 3, g: {ch:"C", en:"C", ma:"C", sc:"C", so:"C"}, total: 15, c: 29, s: 499, d: 7712 },
-        { id: 9, name: "陳祐呈", write: 4, g: {ch:"A+", en:"A+", ma:"B++", sc:"B++", so:"B++"}, total: 34, c: 7, s: 94, d: 757 },
-        { id: 10, name: "陳睿宏", write: 3, g: {ch:"B", en:"B", ma:"B", sc:"B+", so:"B+"}, total: 23, c: 21, s: 354, d: 3800 },
-        { id: 11, name: "黃煒凱", write: 3, g: {ch:"B++", en:"B", ma:"B+", sc:"B+", so:"B"}, total: 25, c: 14, s: 297, d: 2988 },
-        { id: 12, name: "黃峻唯", write: 4, g: {ch:"A++", en:"B+", ma:"A", sc:"A", so:"A+"}, total: 36, c: 6, s: 67, d: 468 },
-        { id: 13, name: "楊皓宇", write: 1, g: {ch:"B", en:"B", ma:"B+", sc:"B", so:"B++"}, total: 22, c: 22, s: 358, d: 3865 },
-        { id: 14, name: "劉丞恩", write: 1, g: {ch:"B", en:"C", ma:"B", sc:"C", so:"B"}, total: 18, c: 28, s: 463, d: 6492 },
-        { id: 15, name: "劉宥承", write: 4, g: {ch:"B++", en:"B++", ma:"A", sc:"B++", so:"B++"}, total: 31, c: 11, s: 148, d: 1325 },
-        { id: 16, name: "劉煥騰", write: 4, g: {ch:"A++", en:"B++", ma:"A", sc:"A+", so:"A++"}, total: 39, c: 2, s: 40, d: 232 },
-        { id: 17, name: "洪湘芸", write: 5, g: {ch:"B++", en:"B+", ma:"C", sc:"B+", so:"A+"}, total: 27, c: 13, s: 234, d: 2191 },
-        { id: 18, name: "胡語彤", write: 2, g: {ch:"B", en:"B+", ma:"B++", sc:"B", so:"B"}, total: 25, c: 16, s: 303, d: 3117 },
-        { id: 19, name: "張晏翎", write: 3, g: {ch:"B+", en:"B", ma:"B", sc:"B", so:"B+"}, total: 24, c: 17, s: 329, d: 3352 },
-        { id: 20, name: "張凱薰", write: 4, g: {ch:"B", en:"B+", ma:"A", sc:"C", so:"B"}, total: 22, c: 23, s: 365, d: 3981 },
-        { id: 21, name: "許晶融", write: 3, g: {ch:"B+", en:"C", ma:"B+", sc:"B++", so:"B+"}, total: 24, c: 18, s: 333, d: 3372 },
-        { id: 22, name: "黃筱菁", write: 5, g: {ch:"A+", en:"B+", ma:"B++", sc:"A+", so:"A++"}, total: 37, c: 3, s: 54, d: 357 },
-        { id: 23, name: "黃心渝", write: 4, g: {ch:"B++", en:"B+", ma:"A++", sc:"B++", so:"B++"}, total: 32, c: 9, s: 133, d: 1126 },
-        { id: 24, name: "童若瑄", write: 4, g: {ch:"A+", en:"B++", ma:"A", sc:"A", so:"A++"}, total: 37, c: 5, s: 59, d: 393 },
-        { id: 25, name: "黃寀菡", write: 3, g: {ch:"C", en:"C", ma:"C", sc:"C", so:"C"}, total: 15, c: 29, s: 499, d: 7712 },
-        { id: 26, name: "詹沛璇", write: 5, g: {ch:"B", en:"B+", ma:"B+", sc:"B", so:"B"}, total: 23, c: 19, s: 339, d: 3502 },
-        { id: 27, name: "廖婕渝", write: 4, g: {ch:"B", en:"B", ma:"B", sc:"B", so:"B"}, total: 20, c: 24, s: 412, d: 4886 },
-        { id: 28, name: "劉芮瑜", write: 4, g: {ch:"A++", en:"B++", ma:"A", sc:"A", so:"A"}, total: 37, c: 4, s: 55, d: 363 },
-        { id: 29, name: "潘曉靚", write: 4, g: {ch:"A+", en:"A", ma:"B++", sc:"A", so:"B++"}, total: 33, c: 8, s: 109, d: 908 },
-        { id: 30, name: "謝沛璇", write: 5, g: {ch:"A++", en:"A+", ma:"A", sc:"A++", so:"A++"}, total: 41, c: 1, s: 29, d: 99 }
+        {id:1, name:"王昱叡", v:12, w:227, x:2065, g:{ch:"B+", en:"B", ma:"B++", sc:"B++", so:"A", wr:"4"}},
+        {id:2, name:"吳彥勳", v:15, w:299, x:3006, g:{ch:"B+", en:"B", ma:"A", sc:"B+", so:"B", wr:"3"}},
+        {id:3, name:"李致諭", v:20, w:351, x:3751, g:{ch:"B", en:"C", ma:"A", sc:"B", so:"B+", wr:"4"}},
+        {id:4, name:"李晉安", v:25, w:419, x:5056, g:{ch:"B", en:"C", ma:"B+", sc:"B", so:"B", wr:"3"}},
+        {id:5, name:"沈宏彥", v:10, w:142, x:1250, g:{ch:"A+", en:"B", ma:"A+", sc:"B+", so:"A", wr:"4"}},
+        {id:6, name:"張于宗", v:26, w:427, x:5326, g:{ch:"C", en:"B", ma:"B+", sc:"B", so:"B", wr:"2"}},
+        {id:7, name:"梁澄祐", v:27, w:460, x:6423, g:{ch:"B", en:"C", ma:"C", sc:"B", so:"B", wr:"4"}},
+        {id:8, name:"陳宥予", v:29, w:499, x:7712, g:{ch:"C", en:"C", ma:"C", sc:"C", so:"C", wr:"3"}},
+        {id:9, name:"陳祐呈", v:7, w:94, x:757, g:{ch:"A+", en:"A+", ma:"B++", sc:"B++", so:"B++", wr:"4"}},
+        {id:10, name:"陳睿宏", v:21, w:354, x:3800, g:{ch:"B+", en:"B+", ma:"A+", sc:"B++", so:"B++", wr:"3"}},
+        {id:11, name:"黃煒凱", v:14, w:297, x:2988, g:{ch:"B++", en:"B", ma:"B+", sc:"B+", so:"B", wr:"3"}},
+        {id:12, name:"黃峻唯", v:6, w:67, x:468, g:{ch:"A++", en:"B+", ma:"A", sc:"A", so:"A+", wr:"4"}},
+        {id:13, name:"楊皓宇", v:22, w:358, x:3865, g:{ch:"B", en:"B", ma:"B+", sc:"B", so:"B++", wr:"4"}},
+        {id:14, name:"劉丞恩", v:28, w:463, x:6492, g:{ch:"B", en:"C", ma:"B", sc:"C", so:"B", wr:"3"}},
+        {id:15, name:"劉宥承", v:11, w:148, x:1325, g:{ch:"B++", en:"B++", ma:"A", sc:"B++", so:"B++", wr:"4"}},
+        {id:16, name:"劉煥騰", v:2, w:40, x:232, g:{ch:"A++", en:"B++", ma:"A", sc:"A+", so:"A++", wr:"4"}},
+        {id:17, name:"洪湘芸", v:13, w:234, x:2191, g:{ch:"B++", en:"B+", ma:"C", sc:"B+", so:"A+", wr:"4"}},
+        {id:18, name:"胡語彤", v:16, w:303, x:3117, g:{ch:"B", en:"B+", ma:"B++", sc:"B++", so:"B", wr:"2"}},
+        {id:19, name:"張晏翎", v:17, w:329, x:3352, g:{ch:"B+", en:"B", ma:"B", sc:"B++", so:"B+", wr:"3"}},
+        {id:20, name:"張凱薰", v:23, w:365, x:3981, g:{ch:"B", en:"B+", ma:"B+", sc:"B++", so:"B", wr:"4"}},
+        {id:21, name:"許晶融", v:18, w:333, x:3372, g:{ch:"B+", en:"C", ma:"B+", sc:"B++", so:"B+", wr:"3"}},
+        {id:22, name:"黃筱菁", v:3, w:54, x:357, g:{ch:"A+", en:"B+", ma:"B++", sc:"A+", so:"A++", wr:"4"}},
+        {id:23, name:"黃心渝", v:9, w:133, x:1126, g:{ch:"B++", en:"B+", ma:"A++", sc:"B++", so:"B++", wr:"4"}},
+        {id:24, name:"童若瑄", v:5, w:59, x:393, g:{ch:"A+", en:"A", ma:"A+", sc:"A", so:"A++", wr:"4"}},
+        {id:25, name:"黃寀菡", v:29, w:499, x:7712, g:{ch:"C", en:"C", ma:"C", sc:"C", so:"C", wr:"3"}},
+        {id:26, name:"詹沛璇", v:19, w:339, x:3502, g:{ch:"B", en:"B+", ma:"B+", sc:"B", so:"B", wr:"4"}},
+        {id:27, name:"廖婕妤", v:24, w:412, x:4886, g:{ch:"B", en:"B", ma:"B", sc:"B", so:"B", wr:"3"}},
+        {id:28, name:"劉芮瑜", v:4, w:55, x:363, g:{ch:"A++", en:"B++", ma:"A", sc:"A", so:"A", wr:"4"}},
+        {id:29, name:"潘曉靚", v:8, w:109, x:908, g:{ch:"A+", en:"A", ma:"B++", sc:"A", so:"B++", wr:"4"}},
+        {id:30, name:"謝沛璇", v:1, w:29, x:99, g:{ch:"A++", en:"A+", ma:"A", sc:"A++", so:"A++", wr:"5"}},
     ];
 
-    const pointMap = {"A++":7,"A+":6,"A":5,"B++":4,"B+":3,"B":2,"C":1};
-    const thresholds = [
-        { score: 0, name: "蓄勢待發" }, { score: 14, name: "優質技職" }, { score: 22, name: "溪中/彰商" },
-        { score: 26, name: "彰工/彰商" }, { score: 30, name: "彰中/彰女" }, { score: 35, name: "頂尖特優" }
+    const schoolData = [
+        {name:"彰女/彰中", score:118, icon:"👑"}, {name:"彰工商/工", score:116, icon:"🌟"}, 
+        {name:"員林高中", score:114.5, icon:"✨"}, {name:"溪湖高中", score:112, icon:"⭐️"}, 
+        {name:"成功高中", score:104, icon:"🏆"}, {name:"門檻校系", score:90, icon:"🛡️"}
     ];
-    const subName = {ch:"國文", en:"英文", ma:"數學", sc:"自然", so:"社會"};
+
+    const pointMap = {"A++":9, "A+":8, "A":7, "B++":6, "B+":5, "B":4, "C":3};
+    const subName = {ch:"國文", en:"英文", ma:"數學", sc:"自然", so:"社會", wr:"寫作"};
+    const subOrder = ["ch", "en", "ma", "sc", "so", "wr"];
+    const colors = {ch:'#4ade80', en:'#22d3ee', ma:'#fbbf24', sc:'#f87171', so:'#a855f7', wr:'#8b5cf6'};
     let currentUser = null;
+    let myRadar = null;
+    let trendChart = null;
+
+    window.onload = () => {
+        const sel = document.getElementById('userSelect');
+        db.forEach(u => sel.add(new Option(`座號 ${u.id.toString().padStart(2,'0')} - ${u.name}`, u.id)));
+        
+        const cramBody = document.getElementById('cramSetupBody');
+        subOrder.slice(0,5).forEach(k => {
+            let tr = `<tr><td style="color:var(--gold); font-weight:bold;">${subName[k]}</td>`;
+            for(let d=1; d<=6; d++) tr += `<td><input type="checkbox" class="cram-day" data-sub="${k}" data-day="${d}" style="width:18px; height:18px;"></td>`;
+            cramBody.innerHTML += tr + `</tr>`;
+        });
+
+        const gIn = document.getElementById('gradeInputs');
+        subOrder.forEach(k => {
+            let html = `<div><small style="color:var(--accent); font-weight:bold;">${subName[k]}</small><select id="in_${k}">`;
+            let opts = (k === "wr") ? ["6","5","4","3","2","1"] : ["A++","A+","A","B++","B+","B","C"];
+            opts.forEach(v => html += `<option value="${v}">${v}</option>`);
+            gIn.innerHTML += html + `</select></div>`;
+        });
+    };
 
     function handleLogin() {
         const id = document.getElementById('userSelect').value;
         const pass = document.getElementById('userPass').value;
-        const saved = localStorage.getItem('pwd_'+id) || ("308"+(id<10?'0'+id:id));
-        if(pass === saved) {
-            currentUser = db.find(x => x.id == id);
-            document.getElementById('loginWrapper').style.display='none';
-            initDashboard(currentUser);
-        } else alert("密碼錯誤");
-    }
-
-    function initDashboard(s) {
-        document.getElementById('reportSection').style.display = 'block';
-        document.getElementById('displayName').innerText = s.name;
-        renderAll(s.g, s.write, s.total, s.c, s.s, s.d);
+        if(!id) return alert("請選擇座號");
         
-        // 預填輸入區
-        ["Ch","En","Ma","Sc","So"].forEach(k => document.getElementById('in'+k).value = s.g[k.toLowerCase()]);
-        document.getElementById('inWrite').value = s.write;
+        if(heroKeys[id] === pass) {
+            currentUser = JSON.parse(JSON.stringify(db.find(u => u.id == id)));
+            document.getElementById('loginWrapper').style.display = 'none';
+            document.getElementById('reportSection').style.display = 'block';
+            updateDashboard();
+            resetInputsToCurrent();
+        } else {
+            alert("英雄金鑰錯誤！請洽 908 戰令官。");
+        }
     }
 
-    function renderAll(g, w, total, c, s, d) {
-        document.getElementById('displayScore').innerText = total + " pt";
-        document.getElementById('cRank').innerText = "第 " + c + " 名";
-        document.getElementById('sRank').innerText = "第 " + s + " 名";
-        document.getElementById('dRank').innerText = "第 " + d + " 名";
+    function resetInputsToCurrent() {
+        if(!currentUser) return;
+        const original = db.find(u => u.id == currentUser.id);
+        subOrder.forEach(k => {
+            const defaultValue = original.g[k];
+            document.getElementById('in_'+k).value = defaultValue;
+            currentUser.g[k] = defaultValue;
+        });
+        document.getElementById('in_distRank').value = original.x;
+        currentUser.x = original.x;
+        updateDashboard();
+    }
 
-        // 落點與進度
-        let cur = thresholds.filter(t => t.score <= total).pop() || thresholds[0];
-        let nxt = thresholds.find(t => t.score > total) || {score:41, name:"巔峰境界"};
-        document.getElementById('predictSchool').innerText = "目前預估落點：" + cur.name;
-        document.getElementById('nextTierLabel').innerText = "下一目標：" + nxt.name;
-        document.getElementById('pointsGap').innerText = "還差 " + (nxt.score - total) + " 點";
+    function updateDashboard() {
+        const basePoint = subOrder.slice(0,5).reduce((s, k) => s + pointMap[currentUser.g[k]], 0);
+        const total = basePoint + 90;
         
-        const pct = Math.min(100, ((total - cur.score) / (nxt.score - cur.score)) * 100);
-        document.getElementById('xpFill').style.width = pct + "%";
-        document.getElementById('xpPercentText').innerText = Math.round(pct) + "%";
-        document.getElementById('rankOrb').innerText = total >= 30 ? "💎" : (total >= 25 ? "🌟" : "🛡️");
+        document.getElementById('displayName').innerText = currentUser.name;
+        document.getElementById('xpLabel').innerText = `${basePoint} / 45`;
+        document.getElementById('xpBarFill').style.width = (basePoint/45*100) + "%";
+        document.getElementById('finalScoreLabel').innerText = `目前總戰力：${total}`;
 
-        renderChart(g);
-        renderTimeBar(g);
-        renderTactics(g, w, total);
-    }
+        document.getElementById('val_v').innerHTML = `${currentUser.v}<span class="rank-unit">名</span>`;
+        document.getElementById('val_y').innerHTML = `${currentUser.w}<span class="rank-unit">名</span>`;
+        document.getElementById('val_ab').innerHTML = `${currentUser.x}<span class="rank-unit">名</span>`;
 
-    function renderTactics(g, w, total) {
-        const list = document.getElementById('strategyList'); list.innerHTML = "";
-        const sorted = Object.entries(g).sort((a,b) => pointMap[b[1]] - pointMap[a[1]]);
-        const items = [
-            `<b>【核心守備】</b>您的 ${subName[sorted[0][0]]} (${sorted[0][1]}) 已達高標，維持手感即可。`,
-            `<b>【衝刺關鍵】</b>${subName[sorted[1][0]]} 目前 ${sorted[1][1]}，是跨入 A 級或升點的最短捷徑。`,
-            `<b>【寫作建議】</b>目前寫作 ${w} 級，對總點數影響巨大，請練習佳句擴展。`,
-            `<b>【心理戰術】</b>目前 ${total} 點，距離落點進階僅需 ${nxtGap(total)} 點，穩住不退步就是進步。`
+        const ranks = [
+            {m: 45, t: "璀璨傳說", e: "👑"}, 
+            {m: 40, t: "至高戰神", e: "🔥"}, 
+            {m: 35, t: "超凡大師", e: "🏋🏼‍♂️"}, 
+            {m: 31, t: "璀璨鑽石", e: "💎"}, 
+            {m: 27, t: "堅實鉑金", e: "🏆"}, 
+            {m: 23, t: "榮耀黃金", e: "🌟"}, 
+            {m: 19, t: "不屈白銀", e: "⚔️"}, 
+            {m: 15, t: "英勇青銅", e: "🛡️"}, 
+            {m: 8,  t: "堅韌戰士", e: "🧙🏼‍♂️"}, 
+            {m: 0,  t: "不屈初心者", e: "🌱"}
         ];
-        items.forEach(t => { const d = document.createElement('div'); d.className="strategy-item"; d.innerHTML=t; list.appendChild(d); });
+        const r = ranks.find(x => basePoint >= x.m) || ranks[ranks.length-1];
+        document.getElementById('heroRank').innerText = r.t;
+        document.getElementById('heroEmoji').innerText = r.e;
+
+        document.getElementById('gradeBadges').innerHTML = subOrder.map(k => `
+            <div class="g-badge" style="background:rgba(255,255,255,0.05); padding: 5px 12px; border-radius:10px; border:1px solid ${colors[k]}">
+                ${subName[k]}: <span style="color:var(--gold)">${currentUser.g[k]}</span>
+            </div>
+        `).join('');
+
+        const targets = schoolData.filter(s => s.score <= total).sort((a,b)=>b.score - a.score).slice(0,3);
+        document.getElementById('targetList').innerHTML = targets.map(t => `
+            <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border-left:4px solid var(--gold); margin-bottom:8px; display:flex; justify-content:space-between;">
+                <span>${t.icon} ${t.name}</span> <span style="color:var(--gold); font-weight:900;">門檻 ${t.score}</span>
+            </div>
+        `).join('');
+
+        renderRadarChart();
+        renderTrendChart();
+        renderHistoryList();
+        generateWeeklySchedule();
     }
 
-    function nxtGap(p) { let n = thresholds.find(t => t.score > p); return n ? n.score - p : 1; }
+    function saveCurrentRecord() {
+        const history = JSON.parse(localStorage.getItem(`hero_history_${currentUser.id}`)) || [];
+        const currentInputs = {};
+        subOrder.forEach(k => { currentInputs[k] = document.getElementById('in_'+k).value; });
+        const currentDistRank = parseInt(document.getElementById('in_distRank').value);
 
-    function updateEvolution() {
-        const newG = { ch: document.getElementById('inCh').value, en: document.getElementById('inEn').value, ma: document.getElementById('inMa').value, sc: document.getElementById('inSc').value, so: document.getElementById('inSo').value };
-        const newW = parseInt(document.getElementById('inWrite').value);
-        const newD = parseInt(document.getElementById('inNewDRank').value) || currentUser.d;
-        const newTotal = pointMap[newG.ch] + pointMap[newG.en] + pointMap[newG.ma] + pointMap[newG.sc] + pointMap[newG.so] + newW;
+        const basePoint = subOrder.slice(0,5).reduce((s, k) => s + pointMap[currentInputs[k]], 0);
+        const newRecord = {
+            date: new Date().toLocaleDateString(),
+            xp: basePoint, total: basePoint + 90, grades: currentInputs,
+            x: currentDistRank
+        };
+        history.push(newRecord);
+        localStorage.setItem(`hero_history_${currentUser.id}`, JSON.stringify(history));
+        currentUser.g = currentInputs;
+        currentUser.x = currentDistRank;
+        alert("戰報已存檔！");
+        updateDashboard();
+    }
 
-        // 更新上方 Dashboard
-        renderAll(newG, newW, newTotal, "--", "--", newD);
+    function renderTrendChart() {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const history = JSON.parse(localStorage.getItem(`hero_history_${currentUser.id}`)) || [];
+        const originalDBData = db.find(u => u.id == currentUser.id);
 
-        // 生成進退步報告
-        document.getElementById('evoReport').style.display = 'block';
-        const evoList = document.getElementById('evoList'); evoList.innerHTML = "";
-        
-        Object.keys(newG).forEach(k => {
-            const diff = pointMap[newG[k]] - pointMap[currentUser.g[k]];
-            const row = document.createElement('div'); row.className = "evo-row";
-            const tag = diff > 0 ? `<span class="tag tag-up">進步</span>` : (diff < 0 ? `<span class="tag tag-down">退步</span>` : `<span class="tag">持平</span>`);
-            row.innerHTML = `<span>${subName[k]} (${currentUser.g[k]} ➔ ${newG[k]})</span> ${tag}`;
-            evoList.appendChild(row);
+        const firstPoint = { grades: originalDBData.g, x: originalDBData.x };
+        const historyPoints = history;
+        const currentPreviewGrades = {};
+        subOrder.forEach(k => { currentPreviewGrades[k] = document.getElementById('in_'+k).value; });
+        const currentDistRank = parseInt(document.getElementById('in_distRank').value) || 0;
+        const previewPoint = { grades: currentPreviewGrades, x: currentDistRank };
+
+        const records = [firstPoint, ...historyPoints, previewPoint];
+        const labels = records.map((h, i) => {
+            if (i === 0) return "第1次(初始)";
+            if (i === records.length - 1) return "本次預覽";
+            return `第${i+1}次`;
         });
 
-        const dDiff = currentUser.d - newD;
-        const dRow = document.createElement('div'); dRow.className = "evo-row";
-        dRow.innerHTML = `<span>考區名次 (${currentUser.d} ➔ ${newD})</span> ${dDiff > 0 ? `<span class="tag tag-up">進步 ${dDiff} 名</span>` : (dDiff < 0 ? `<span class="tag tag-down">退步 ${Math.abs(dDiff)} 名</span>` : `<span class="tag">持平</span>`)}`;
-        evoList.appendChild(dRow);
+        const datasets = subOrder.map(k => {
+            return {
+                label: subName[k],
+                data: records.map(h => {
+                    const grade = h.grades[k];
+                    return k === 'wr' ? parseInt(grade) : pointMap[grade];
+                }),
+                borderColor: colors[k],
+                backgroundColor: colors[k] + '33',
+                borderWidth: 2, tension: 0.3,
+                pointRadius: (context) => (context.dataIndex === records.length - 1 ? 6 : 4),
+                pointStyle: (context) => (context.dataIndex === records.length - 1 ? 'rectRot' : 'circle'),
+                fill: false,
+                yAxisID: 'y'
+            };
+        });
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        datasets.push({
+            label: "區排 (右軸)",
+            data: records.map(h => h.x),
+            borderColor: '#94a3b8',
+            borderDash: [5, 5],
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false,
+            yAxisID: 'yRank',
+            pointRadius: 4,
+            pointBackgroundColor: '#94a3b8'
+        });
+
+        if(trendChart) trendChart.destroy();
+        trendChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: labels, datasets: datasets },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        min: 0, max: 10, 
+                        grid: { color: 'rgba(255,255,255,0.05)' }, 
+                        ticks: { color: '#fff', stepSize: 1 } 
+                    },
+                    yRank: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        reverse: true,
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#94a3b8' },
+                        title: { display: true, text: '區排名次', color: '#94a3b8' }
+                    },
+                    x: { ticks: { color: '#fff' } }
+                },
+                plugins: { legend: { display: true, position: 'top', labels: { color: '#fff', boxWidth: 10, font: { size: 10 } } } }
+            }
+        });
     }
 
-    function renderChart(g) {
-        const m = {"A++":100,"A+":90,"A":80,"B++":65,"B+":55,"B":45,"C":20};
+    function renderHistoryList() {
+        const history = JSON.parse(localStorage.getItem(`hero_history_${currentUser.id}`)) || [];
+        const container = document.getElementById('historyList');
+        if(!history.length) {
+            container.innerHTML = "<p style='color:#64748b; text-align:center;'>尚未有額外存檔紀錄</p>";
+            return;
+        }
+        container.innerHTML = history.map((h, i) => `
+            <div class="history-item" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05);">
+                <div>
+                    <span style="color:var(--accent); font-weight:bold;">#${i+2}</span> 
+                    <small style="color:#64748b; margin-left:8px;">${h.date}</small>
+                    <div style="font-weight:900; color:var(--gold); margin-top:4px;">戰力級分: ${h.xp} | 區排: ${h.x}</div>
+                </div>
+                <button onclick="deleteHistory(${i})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.2rem;">🗑️</button>
+            </div>
+        `).join('');
+    }
+
+    function syncAndAnalyze() { 
+        subOrder.forEach(k => { currentUser.g[k] = document.getElementById('in_'+k).value; }); 
+        currentUser.x = parseInt(document.getElementById('in_distRank').value) || 0;
+        updateDashboard(); 
+    }
+
+    function adminResetPrompt() {
+        const adminPass = prompt("請輸入管理員金鑰：");
+        if(adminPass === heroKeys["admin"]) {
+            alert("系統維護模式已開啟。");
+        }
+    }
+
+    function deleteHistory(index) {
+        if(!confirm("確定要刪除這筆戰報嗎？")) return;
+        const history = JSON.parse(localStorage.getItem(`hero_history_${currentUser.id}`)) || [];
+        history.splice(index, 1);
+        localStorage.setItem(`hero_history_${currentUser.id}`, JSON.stringify(history));
+        updateDashboard();
+    }
+
+    function clearAllHistory() {
+        if(!confirm("⚠️ 確定要刪除該帳號的所有歷史戰報嗎？")) return;
+        localStorage.removeItem(`hero_history_${currentUser.id}`);
+        updateDashboard();
+    }
+
+    function renderRadarChart() {
         const ctx = document.getElementById('radarChart').getContext('2d');
-        if(window.myChart) window.myChart.destroy();
-        window.myChart = new Chart(ctx, {
+        const subs5 = subOrder.slice(0,5);
+        const vals = subs5.map(k => pointMap[currentUser.g[k]] * 10 + 10);
+        if(myRadar) myRadar.destroy();
+        myRadar = new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: ['國', '英', '數', '自', '社'],
-                datasets: [{ 
-                    data: [m[g.ch], m[g.en], m[g.ma], m[g.sc], m[g.so]],
-                    backgroundColor: 'rgba(34, 211, 238, 0.2)', borderColor: '#22d3ee', borderWidth: 2, pointRadius: 2
-                }]
+                datasets: [{ data: vals, backgroundColor: 'rgba(34, 211, 238, 0.2)', borderColor: '#22d3ee', borderWidth: 2 }]
             },
-            options: { maintainAspectRatio: false, scales: { r: { grid:{color:'rgba(255,255,255,0.1)'}, angleLines:{color:'rgba(255,255,255,0.1)'}, ticks:{display:false}, suggestedMin:0, suggestedMax:100 } }, plugins:{legend:{display:false}} }
+            options: { 
+                maintainAspectRatio: false,
+                scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: { weight: 'bold' } } } },
+                plugins: { legend: { display: false } }
+            }
         });
+        let sorted = [...subs5].sort((a,b)=>pointMap[currentUser.g[b]] - pointMap[currentUser.g[a]]);
+        document.getElementById('strengthBox').innerHTML = `<b style="color:var(--success)">🌟 優勢：${subName[sorted[0]]}</b><br>核心戰力，繼續保持。`;
+        document.getElementById('weaknessBox').innerHTML = `<b style="color:var(--danger)">🛠️ 加強：${subName[sorted[4]]}</b><br>積分增長關鍵。`;
     }
 
-    function renderTimeBar(g) {
-        const bar = document.getElementById('timeBar'); bar.innerHTML = "";
-        const lv = {"A++":1, "A+":1, "A":1, "B++":3, "B+":5, "B":7, "C":10};
-        let r=0, y=0, gv=0;
-        Object.values(g).forEach(l => {
-            if(l.includes("A")) gv += lv[l]; else if(l.includes("B+")) y += lv[l]; else r += lv[l];
+    function generateWeeklySchedule() {
+        const body = document.getElementById('weeklyBody'); body.innerHTML = "";
+        const crams = Array.from(document.querySelectorAll('.cram-day:checked')).map(i => ({sub: i.dataset.sub, day: i.dataset.day}));
+        let weakK = subOrder.slice(0,5).sort((a,b)=>pointMap[currentUser.g[a]] - pointMap[currentUser.g[b]])[0];
+        const times = ["19:30-21:00", "21:10-22:30"];
+        times.forEach((t, idx) => {
+            let tr = `<tr><td style="color:var(--accent); font-weight:bold;">${t}</td>`;
+            for(let d=1; d<=7; d++) {
+                if(d===7) { tr += `<td>全科複習</td>`; continue; }
+                const c = crams.find(x => x.day == d);
+                if(idx === 0) {
+                    tr += c ? `<td class="cram-active" style="color: var(--gold); font-weight: 900; border: 1.5px solid var(--gold) !important; border-radius: 8px;">補:${subName[c.sub]}</td>` : `<td style="color:${colors[weakK]}; font-weight:bold;">${subName[weakK]}</td>`;
+                } else {
+                    const pool = subOrder.slice(0,5);
+                    const randomSub = pool[Math.floor(Math.random() * pool.length)];
+                    tr += `<td style="color:${colors[randomSub]}">${subName[randomSub]}</td>`;
+                }
+            }
+            body.innerHTML += tr + "</tr>";
         });
-        const sum = r+y+gv;
-        [[r,"#ef4444"],[y,"#fbbf24"],[gv,"#10b981"]].forEach(t => {
-            const d = document.createElement('div'); d.style.width = (t[0]/sum*100) + "%"; d.style.background = t[1]; bar.appendChild(d);
-        });
-    }
-
-    function openPwdModal() { document.getElementById('overlay').style.display='block'; document.getElementById('pwdModal').style.display='block'; }
-    function closePwdModal() { document.getElementById('overlay').style.display='none'; document.getElementById('pwdModal').style.display='none'; }
-    function submitNewPwd() {
-        const id = document.getElementById('userSelect').value;
-        const saved = localStorage.getItem('pwd_'+id) || ("308"+(id<10?'0'+id:id));
-        if(document.getElementById('oldPwd').value === saved && document.getElementById('newPwd').value.length >= 4) {
-            localStorage.setItem('pwd_'+id, document.getElementById('newPwd').value);
-            alert("修改成功！"); closePwdModal();
-        } else alert("驗證失敗");
-    }
-
-    window.onload = () => {
-        const sel = document.getElementById('userSelect');
-        db.forEach(s => { const o = document.createElement('option'); o.value=s.id; o.text=`${s.id < 10 ? '0'+s.id : s.id} - ${s.name}`; sel.appendChild(o); });
-        
-        const sim = document.getElementById('simInputs');
-        ["Ch","En","Ma","Sc","So"].forEach(k => {
-            const d = document.createElement('div'); d.innerHTML = `<label style="font-size:0.7rem; color:#94a3b8">${subName[k.toLowerCase()]}</label><select id="in${k}"></select>`;
-            sim.appendChild(d);
-            ["A++","A+","A","B++","B+","B","C"].forEach(l => { const o = document.createElement('option'); o.value=o.text=l; document.getElementById('in'+k).appendChild(o); });
-        });
-        const wd = document.createElement('div'); wd.innerHTML = `<label style="font-size:0.7rem; color:#94a3b8">寫作</label><select id="inWrite"></select>`;
-        sim.appendChild(wd);
-        [6,5,4,3,2,1,0].forEach(v => { const o = document.createElement('option'); o.value=o.text=v; document.getElementById('inWrite').appendChild(o); });
     }
 </script>
 </body>
