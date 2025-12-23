@@ -191,29 +191,29 @@
         </div>
 
         <div class="card" style="border: 1.5px dashed var(--accent);">
-            <h3>⚡ 成就解鎖 (輸入新模考成績) </h3>
+            <h3>⚡ 成就解鎖 (輸入新積分) </h3>
             <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;" id="gradeInputs"></div>
             <div style="margin-top: 10px;">
-                <small style="color:var(--gold); font-weight:bold;">📍 本次模擬考區排 (預覽同步至折線圖)</small>
+                <small style="color:var(--gold); font-weight:bold;">📍 本次模擬考區排</small>
                 <input type="number" id="in_distRank" placeholder="請輸入區排次">
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
                 <button class="main-btn" onclick="syncAndAnalyze()">同步分析數據</button>
                 <button class="main-btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid #475569;" onclick="resetInputsToCurrent()">🧹 清除/恢復預設</button>
             </div>
-            <button class="main-btn" style="margin-top:10px; background:var(--gold); color:#000;" onclick="saveCurrentRecord()">💾 將此成績存為正式戰報</button>
+            <button class="main-btn" style="margin-top:10px; background:var(--gold); color:#000;" onclick="saveCurrentRecord()">💡 將此成績存為正式戰報</button>
         </div>
 
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h3 style="margin:0; border-left: 4px solid var(--accent); padding-left: 10px;">📂 戰報存檔</h3>
-                <button onclick="clearAllHistory()" style="background:rgba(244,63,94,0.1); border:1px solid var(--danger); color:var(--danger); padding:5px 12px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:bold; border: 1px solid var(--danger);">🧹 全部清除</button>
+                <button onclick="clearAllHistory()" style="background:rgba(244,63,94,0.1); border:1px solid var(--danger); color:var(--danger); padding:5px 12px; border-radius:10px; cursor:pointer; font-size:0.8rem; font-weight:bold; border: 1px solid var(--danger);"> 全部清除</button>
             </div>
             <div id="historyList"></div>
         </div>
 
         <div class="card">
-            <h3>🎯 目前已開發地圖</h3>
+            <h3>📍 目前已開發地圖</h3>
             <div id="targetList"></div>
             <div id="finalScoreLabel" style="text-align: right; margin-top: 10px; font-weight: 900; color: var(--accent); font-size: 1.1rem;">--</div>
         </div>
@@ -331,7 +331,7 @@
             updateDashboard();
             resetInputsToCurrent();
         } else {
-            alert("英雄金鑰錯誤！請洽 908 戰令官。");
+            alert("英雄金鑰錯誤！請洽盟主。");
         }
     }
 
@@ -368,7 +368,7 @@
             {m: 31, t: "璀璨鑽石", e: "💎"}, 
             {m: 27, t: "堅實鉑金", e: "🏆"}, 
             {m: 23, t: "榮耀黃金", e: "🌟"}, 
-            {m: 19, t: "不屈白銀", e: "⚔️"}, 
+            {m: 19, t: "星耀白銀", e: "⚔️"}, 
             {m: 15, t: "英勇青銅", e: "🛡️"}, 
             {m: 8,  t: "堅韌戰士", e: "🧙🏼‍♂️"}, 
             {m: 0,  t: "不屈初心者", e: "🌱"}
@@ -537,7 +537,7 @@
     }
 
     function clearAllHistory() {
-        if(!confirm("⚠️ 確定要刪除該帳號的所有歷史戰報嗎？")) return;
+        if(!confirm("⚠️ 確定要刪除該帳號的所有戰報嗎？")) return;
         localStorage.removeItem(`hero_history_${currentUser.id}`);
         updateDashboard();
     }
