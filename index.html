@@ -114,7 +114,8 @@
         <div class="card" style="text-align: center;">
             <div id="heroEmoji" style="font-size: 3.5rem; margin-bottom: 5px;">🎖️</div>
             <h2 id="displayName" style="font-size: 2rem; margin: 0;">--</h2>
-            <div id="heroRank" style="color:var(--accent); font-size: 1.2rem; font-weight:900; letter-spacing: 2px;">--</div>
+            <div id="heroRank" style="color:var(--accent); font-size: 1.2rem; font-weight:900; letter-spacing: 2px; line-height: 1.4;">--</div>
+            <div id="rankGapInfo" style="margin-top: 8px; font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;"></div>
         </div>
 
         <div class="card">
@@ -198,8 +199,8 @@
                 <input type="number" id="in_distRank" placeholder="請輸入區排次">
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
-                <button class="main-btn" onclick="syncAndAnalyze()">同步分析數據</button>
-                <button class="main-btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid #475569;" onclick="resetInputsToCurrent()">🧹 清除/恢復預設</button>
+                <button class="main-btn" style="font-size: 0.85rem;" onclick="syncAndAnalyze()">同步分析數據</button>
+                <button class="main-btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid #475569; font-size: 0.85rem;" onclick="resetInputsToCurrent()">🧹 清除/恢復預設</button>
             </div>
             <button class="main-btn" style="margin-top:10px; background:var(--gold); color:#000;" onclick="saveCurrentRecord()">💡 將此成績存為正式戰報</button>
         </div>
@@ -373,9 +374,31 @@
             {m: 8,  t: "堅韌戰士", e: "🧙🏼‍♂️"}, 
             {m: 0,  t: "不屈初心者", e: "🌱"}
         ];
-        const r = ranks.find(x => basePoint >= x.m) || ranks[ranks.length-1];
+        
+        // 找出目前的等級索引
+        const currentRankIdx = ranks.findIndex(x => basePoint >= x.m);
+        const r = ranks[currentRankIdx] || ranks[ranks.length-1];
         document.getElementById('heroRank').innerText = r.t;
         document.getElementById('heroEmoji').innerText = r.e;
+
+        // 計算並顯示級分差距
+        let gapHtml = "";
+        if (currentRankIdx > 0) {
+            const nextRank = ranks[currentRankIdx - 1];
+            const toNext = nextRank.m - basePoint;
+            gapHtml += `<span style="color:#94a3b8">距離【${nextRank.t}】還差 </span><b style="color:var(--accent)">${toNext}</b><span style="color:#94a3b8"> 級分</span>`;
+        } else {
+            gapHtml += `<b style="color:var(--gold)">✨ 傳說巔峰：已達最高階級 ✨</b>`;
+        }
+        
+        const floorGap = basePoint - r.m;
+        if (floorGap > 0) {
+            gapHtml += `<br><small style="color:#64748b">已超越【${r.t}】門檻 ${floorGap} 級分</small>`;
+        } else if (currentRankIdx < ranks.length - 1) {
+            gapHtml += `<br><small style="color:var(--success)">穩定守住【${r.t}】稱號中</small>`;
+        }
+
+        document.getElementById('rankGapInfo').innerHTML = gapHtml;
 
         document.getElementById('gradeBadges').innerHTML = subOrder.map(k => `
             <div class="g-badge" style="background:rgba(255,255,255,0.05); padding: 5px 12px; border-radius:10px; border:1px solid ${colors[k]}">
